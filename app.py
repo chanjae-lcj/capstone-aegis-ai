@@ -12,12 +12,14 @@ def login():
     return render_template("login.html")
 
 if __name__ == '__main__':
-    # mysql db 연동
-    # app.config.from_pyfile("config.py")
-    # database = create_engine(app.config['DB_URL'], encoding='utf-8', max_overflow=0)
-    # app.database = database
+    # config.py 파일에서 설정 불러오기
+    app.config.from_pyfile("config.py")
 
-    app.run(debug=True) # 플라스크 처음 디폴트
-    # app.run('0.0.0.0', port=5000, debug=True)
+    # 데이터베이스 엔진 생성
+    database = create_engine(app.config['DB_URL'], max_overflow=0)
+    app.database = database
+
+    # Flask 애플리케이션 실행
+    app.run('0.0.0.0', port=5000, debug=True)
 
 # 실헹 방법 : 그냥 오른쪽 위에 실행 버튼 누르기
