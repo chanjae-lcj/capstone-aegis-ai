@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stepped Line Chart Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{url_for('static',filename='js/utils.js')}}"></script> <!-- 선택사항: 유틸리티 함수 -->
+    <style>
+        #chart-container {
+            width: 600px;
+            height: 400px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- <div style="text-align: center; margin-top: 20px;">
+        <button id="step-false">Step: false</button>
+        <button id="step-true">Step: true</button>
+        <button id="step-before">Step: before</button>
+        <button id="step-after">Step: after</button>
+        <button id="step-middle">Step: middle</button>
+    </div> -->
+
+    <script>
+        // 유틸리티 함수 정의
+        // const Utils = {
+        //     numbers: ({count, min, max}) => Array.from({length: count}, () => Math.floor(Math.random() * (max - min + 1)) + min),
+        //     CHART_COLORS: {
+        //         red: 'rgb(255, 99, 132)',
+        //     },
+        // };
+
+        // 데이터 및 차트 설정
+        const data = {
+            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6'],
+            datasets: [
+                {
+                    label: 'Dataset',
+                    data: Utils.numbers({count: 6, min: -100, max: 100}),
+                    borderColor: Utils.CHART_COLORS.red,
+                    fill: false,
+                    stepped: true,
+                }
+            ]
+        };
+
+        const config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                interaction: {
+                    intersect: false,
+                    axis: 'x'
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: (ctx) => 'Step ' + ctx.chart.data.datasets[0].stepped + ' Interpolation',
+                    }
+                }
+            }
+        };
+
+        // 차트 생성
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, config);
+
+        // Step 핸들러 정의
+        // const actions = [
+        //     {
+        //         name: 'Step: false (default)',
+        //         handler: () => {
+        //             myChart.data.datasets.forEach(dataset => {
+        //                 dataset.stepped = false;
+        //             });
+        //             myChart.update();
+        //         }
+        //     },
+        //     {
+        //         name: 'Step: true',
+        //         handler: () => {
+        //             myChart.data.datasets.forEach(dataset => {
+        //                 dataset.stepped = true;
+        //             });
+        //             myChart.update();
+        //         }
+        //     },
+        //     {
+        //         name: 'Step: before',
+        //         handler: () => {
+        //             myChart.data.datasets.forEach(dataset => {
+        //                 dataset.stepped = 'before';
+        //             });
+        //             myChart.update();
+        //         }
+        //     },
+        //     {
+        //         name: 'Step: after',
+        //         handler: () => {
+        //             myChart.data.datasets.forEach(dataset => {
+        //                 dataset.stepped = 'after';
+        //             });
+        //             myChart.update();
+        //         }
+        //     },
+        //     {
+        //         name: 'Step: middle',
+        //         handler: () => {
+        //             myChart.data.datasets.forEach(dataset => {
+        //                 dataset.stepped = 'middle';
+        //             });
+        //             myChart.update();
+        //         }
+        //     }
+        // ];
+
+        // 버튼 클릭 이벤트 연결
+        // document.getElementById('step-false').addEventListener('click', actions[0].handler);
+        // document.getElementById('step-true').addEventListener('click', actions[1].handler);
+        // document.getElementById('step-before').addEventListener('click', actions[2].handler);
+        // document.getElementById('step-after').addEventListener('click', actions[3].handler);
+        // document.getElementById('step-middle').addEventListener('click', actions[4].handler);
+
+        // // 30초마다 데이터 업데이트
+        // setInterval(() => {
+        //     myChart.data.datasets.forEach(dataset => {
+        //         dataset.data = Utils.numbers({count: 6, min: -100, max: 100});
+        //     });
+        //     myChart.update();
+        // }, 1000); // 1000 -> 1초
+        // // 30000 밀리초 = 30초
+    </script>
+</body>
+</html>
