@@ -5,7 +5,7 @@ import os
 import json
 
 app = Flask(__name__)
-# 세션을 위한 비밀 키
+app.secret_key = '' # 세션을 위한 비밀 키
 
 
 # PAM 객체 생성
