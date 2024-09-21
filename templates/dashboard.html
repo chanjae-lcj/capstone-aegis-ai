@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Aegis Ai - Dashboard</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="{{url_for('static',filename='vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+            rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{{url_for('static',filename='css/sb-admin-2.min.css')}}" rel="stylesheet">
+
+    <!-- 커스텀 css -->
+    <link href="{{url_for('static',filename='css/aegisai.css')}}" rel="stylesheet">
+
+    <!-- cpu 차트 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <!-- 네트워크 그레프 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+
+    <!-- 네트워크 테이블 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" style="background-color: #333;">
+
+            <!-- Sidebar - Brand -->
+            <!-- 이게 맨위에 로고 -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/dashboard"> 
+                <!-- 보안 이미지 부트스트랩 가져온거 -->
+                <div class="sidebar-brand-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+                    <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/>
+                    <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text mx-3">Aegis Ai<sup>*</sup></div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active">
+                <a class="nav-link" href="/dashboard">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Interface
+            </div>
+
+            <!-- Nav Item - IP 컨트롤러 -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseIPController"
+                    aria-expanded="true" aria-controls="IPController">
+                    <i class="fas fa-fw fa-table"></i>
+                    <span>IP Controller</span>
+                </a>
+                <div id="collapseIPController" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">IP Controller:</h6>
+                        <a class="collapse-item" href="/rule">IP 차단</a>
+                        <a class="collapse-item" href="/allow">IP 허용</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - AI 컨트롤러 -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAIController"
+                    aria-expanded="true" aria-controls="collapseAIController">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-reddit" viewBox="0 0 16 16">
+                            <path d="M6.167 8a.83.83 0 0 0-.83.83c0 .459.372.84.83.831a.831.831 0 0 0 0-1.661m1.843 3.647c.315 0 1.403-.038 1.976-.611a.23.23 0 0 0 0-.306.213.213 0 0 0-.306 0c-.353.363-1.126.487-1.67.487-.545 0-1.308-.124-1.671-.487a.213.213 0 0 0-.306 0 .213.213 0 0 0 0 .306c.564.563 1.652.61 1.977.61zm.992-2.807c0 .458.373.83.831.83s.83-.381.83-.83a.831.831 0 0 0-1.66 0z"/>
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.828-1.165c-.315 0-.602.124-.812.325-.801-.573-1.9-.945-3.121-.993l.534-2.501 1.738.372a.83.83 0 1 0 .83-.869.83.83 0 0 0-.744.468l-1.938-.41a.2.2 0 0 0-.153.028.2.2 0 0 0-.086.134l-.592 2.788c-1.24.038-2.358.41-3.17.992-.21-.2-.496-.324-.81-.324a1.163 1.163 0 0 0-.478 2.224q-.03.17-.029.353c0 1.795 2.091 3.256 4.669 3.256s4.668-1.451 4.668-3.256c0-.114-.01-.238-.029-.353.401-.181.688-.592.688-1.069 0-.65-.525-1.165-1.165-1.165"/>
+                          </svg>
+                    </i>
+                    <span>AI Controller</span>
+                </a>
+                <div id="collapseAIController" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">AI Controller:</h6>
+                        <a class="collapse-item" href="/ai">자동 차단 규칙</a>
+                        <a class="collapse-item" href="/model">모델 설정</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - NAT -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseNAT"
+                    aria-expanded="true" aria-controls="collapseNAT">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-fill-exclamation" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.8 11.8 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7 7 0 0 0 1.048-.625 11.8 11.8 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.54 1.54 0 0 0-1.044-1.263 63 63 0 0 0-2.887-.87C9.843.266 8.69 0 8 0m-.55 8.502L7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0M8.002 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                          </svg>
+                    </i>
+                    <span>NAT</span>
+                </a>
+                <div id="collapseNAT" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">NAT:</h6>
+                        <a class="collapse-item" href="/port">Port Forwarding</a>
+                        <a class="collapse-item" href="/nat">Floating IP</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - 라우팅 -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseRouting"
+                    aria-expanded="true" aria-controls="collapseRouting">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-joystick" viewBox="0 0 16 16">
+                            <path d="M10 2a2 2 0 0 1-1.5 1.937v5.087c.863.083 1.5.377 1.5.726 0 .414-.895.75-2 .75s-2-.336-2-.75c0-.35.637-.643 1.5-.726V3.937A2 2 0 1 1 10 2"/>
+                            <path d="M0 9.665v1.717a1 1 0 0 0 .553.894l6.553 3.277a2 2 0 0 0 1.788 0l6.553-3.277a1 1 0 0 0 .553-.894V9.665c0-.1-.06-.19-.152-.23L9.5 6.715v.993l5.227 2.178a.125.125 0 0 1 .001.23l-5.94 2.546a2 2 0 0 1-1.576 0l-5.94-2.546a.125.125 0 0 1 .001-.23L6.5 7.708l-.013-.988L.152 9.435a.25.25 0 0 0-.152.23"/>
+                          </svg>
+                    </i>
+                    <span>Routing</span>
+                </a>
+                <div id="collapseRouting" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">Routing:</h6>
+                        <a class="collapse-item" href="/routes">Static Routes</a>
+                        <a class="collapse-item" href="/bgp">BGP</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Nav Item - VPN -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseVPN"
+                    aria-expanded="true" aria-controls="collapseVPN">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe-americas" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0M2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484q-.121.12-.242.234c-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
+                          </svg>
+                    </i>
+                    <span>VPN</span>
+                </a>
+                <div id="collapseVPN" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <h6 class="collapse-header">VPN:</h6>
+                        <a class="collapse-item" href="/openvpn">Open VPN</a>
+                        <a class="collapse-item" href="/pptp">PPTP</a>
+                        <a class="collapse-item" href="/l2tp">L2TP</a>
+                    </div>
+                </div>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                setting
+            </div>
+
+            <!-- Nav Item - 인터페이스 관리 -->
+            <li class="nav-item">
+                <a class="nav-link" href="/interface">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Interface Management</span></a>
+            </li>
+
+            <!-- Nav Item - 사용자 계정 관리 -->
+            <li class="nav-item">
+                <a class="nav-link" href="/user">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                          </svg>
+                    </i>
+                    <span>User Management</span></a>
+            </li>
+
+            <!-- Nav Item - 문서화, 결과물 -->
+            <li class="nav-item">
+                <a class="nav-link" href="/document">
+                    <i class="fas fa-fw">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                          </svg>
+                    </i>
+                    <span>Documentation</span></a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-secondary topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Search -->
+                    <form
+                        class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group">
+                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
+                                aria-label="Search" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                        <li class="nav-item dropdown no-arrow d-sm-none">
+                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-search fa-fw"></i>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
+                                aria-labelledby="searchDropdown">
+                                <form class="form-inline mr-auto w-100 navbar-search">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-light border-0 small"
+                                            placeholder="Search for..." aria-label="Search"
+                                            aria-describedby="basic-addon2">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+
+                        
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">Hallym</span>
+                                <img class="img-profile rounded-circle"
+                                    src="{{url_for('static',filename='img/undraw_profile.svg')}}">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Profile
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Settings
+                                </a>
+                                <a class="dropdown-item" href="#">
+                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Activity Log
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{{url_for('logout')}}">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Content Row 첫 번째 컨텐츠 부분-->
+                    <div class="row">
+
+                        <!-- 시스템 인포메이션 카드 부분 -->
+                        <div class="col-xl-6 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">System Information</h4>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+
+                                    <!-- 1 Row -->
+                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">사용자 이름</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="user_name">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2 Row -->
+                                    <div class="row align-items-center py-2 border-bottom">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">시스템 인터페이스</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="sys_info">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3 Row -->
+                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">CPU 개수</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="cpu_count">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 4 Row -->
+                                    <div class="row align-items-center py-2 border-bottom">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">IP 주소</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="ip_address">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 5 Row -->
+                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">DNS 정보</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="dns_info">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 6 Row -->
+                                    <div class="row align-items-center py-2 border-bottom">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">네트워크 인터페이스</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="net_info">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 7 Row -->
+                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">CPU 사용량</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="cpu">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 8 Row -->
+                                    <div class="row align-items-center py-2 border-bottom">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">디스크 사용량</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="disk-used">Loading...</span> GB / <span id="disk-total">Loading...</span> GB (<span id="disk-percent">Loading...</span>%)
+                                        </div>
+                                    </div>
+
+                                    <!-- 9 Row -->
+                                    <div class="row align-items-center py-2 bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">메모리 사용량</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="memory-used">Loading...</span> GB / <span id="memory-total">Loading...</span> GB (<span id="memory-percent">Loading...</span>%)
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+                        <!-- CPU 사용량 그래프 -->
+                        <div class="col-xl-6 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">CPU Usage</h4>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <canvas id="cpuChart"></canvas>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            - 실시간 CPU 그래프 -
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 네트워크 그래프 -Traffic Graphs- -->
+                    <!-- Content Row 두 번째 컨텐츠 부분-->
+                    <div class="row">
+
+                        <!-- 네트워크 IN 그래프 -->
+                        <div class="col-xl-6 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -In (bytes/sec)-</h4>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <canvas id="inTrafficChart"></canvas>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-primary"></i> lo
+                                            </span>
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-success"></i> enp0s3
+                                            </span>
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-danger"></i> docker0
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 네트워크 OUT 그래프 -->
+                        <div class="col-xl-6 col-lg-5">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -Out (bytes/sec)-</h4>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <canvas id="outTrafficChart"></canvas>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2">
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-primary"></i> lo
+                                            </span>
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-success"></i> enp0s3
+                                            </span>
+                                            <span class="mr-2">
+                                                <i class="fas fa-circle text-danger"></i> docker0
+                                            </span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Interface Statistics -->
+                    <!-- Content Row 세 번째 컨텐츠 부분-->
+                    <div class="row">
+
+                        <!-- 시스템 인포메이션 카드 부분 -->
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">Interface Statistics</h4>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>인터페이스</th>
+                                                        <th>보낸 바이트</th>
+                                                        <th>받은 바이트</th>
+                                                        <th>보낸 패킷</th>
+                                                        <th>받은 패킷</th>
+                                                        <th>수신 에러</th>
+                                                        <th>송신 에러</th>
+                                                        <th>드랍된 수신 패킷</th>
+                                                        <th>드랍된 송신 패킷</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="traffic_data2">
+                                                <!-- 포트 포워딩 목록이 여기에 동적으로 추가됩니다 -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <!-- 끝 -->
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-secondary">
+                <div class="container my-auto">
+                    <div class="text-light copyright text-center my-auto">
+                        <span>캡스톤 AI 방화벽 프로젝트 &copy; Aegis Ai 팀</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+    
+    <!-- Bootstrap core JavaScript-->
+    <script src="{{url_for('static',filename='vendor/jquery/jquery.min.js')}}"></script>
+    <script src="{{url_for('static',filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{{url_for('static',filename='vendor/jquery-easing/jquery.easing.min.js')}}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{{url_for('static',filename='js/sb-admin-2.min.js')}}"></script>
+
+    <!-- Page level plugins -->
+    <script src="{{url_for('static',filename='vendor/chart.js/Chart.min.js')}}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{{url_for('static',filename='js/demo/chart-area-demo.js')}}"></script>
+    <script src="{{url_for('static',filename='js/demo/chart-pie-demo.js')}}"></script>
+
+
+    <!-- 메모리 및 디스크 정보 -->
+    <script>
+        // 서버로부터 시스템 정보를 가져오는 함수
+        function fetchMemoryAndDiskInfo() {
+            fetch('/system_info')
+                .then(response => response.json())
+                .then(data => {
+                    // 메모리 정보 업데이트
+                    document.getElementById('memory-used').textContent = data.memory_used.toFixed(2);
+                    document.getElementById('memory-total').textContent = data.memory_total.toFixed(2);
+                    document.getElementById('memory-percent').textContent = data.memory_percent.toFixed(2);
+
+                    // Disk 정보 업데이트
+                    document.getElementById('disk-used').textContent = data.disk_used.toFixed(2);
+                    document.getElementById('disk-total').textContent = data.disk_total.toFixed(2);
+                    document.getElementById('disk-percent').textContent = data.disk_percent.toFixed(2);
+                })
+                .catch(error => console.error('Error fetching system info:', error));
+        }
+
+        // 페이지 로드 시 시스템 정보를 업데이트
+        window.onload = fetchMemoryAndDiskInfo();
+    </script>
+
+
+    <!-- os 정보 -->
+    <script>
+        // 시스템 정보 가져오는 함수
+        function fetchOSInfo() {
+            fetch('/os_info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('error').textContent = data.error;
+                    } else {
+                        // 데이터를 각각의 HTML 요소에 표시
+                        document.getElementById('user_name').textContent = data.user_name;
+                        document.getElementById('sys_info').textContent = JSON.stringify(data.sys_info, null, 2);
+                        document.getElementById('cpu_count').textContent = data.cpu_count + "개";
+                        document.getElementById('ip_address').textContent = data.ip_address;
+                        document.getElementById('dns_info').textContent = data.dns_info;
+                        document.getElementById('net_info').textContent = data.net_info;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching system info:', error);
+                    document.getElementById('error').textContent = 'Failed to fetch system information.';
+                });
+        }
+
+        // 페이지 로드 시 OS 정보를 업데이트
+        window.onload = function() {
+            fetchMemoryAndDiskInfo();  // 메모리 및 디스크 정보 업데이트
+            fetchOSInfo();             // OS 정보 업데이트
+        };
+    </script>
+
+
+    <!-- CPU 사용량 -->
+    <script>
+        $(document).ready(function() {
+            var ctx = document.getElementById('cpuChart').getContext('2d');
+            var cpuChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // 시간이 채워짐
+                    datasets: [{
+                        label: 'CPU 사용량 (%)',
+                        data: [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                min: 0,
+                                max: 100,
+                                fontSize : 15,
+                            }
+                        }]
+                    }
+                }
+            });
+
+            function updateCpuUsage() {
+                $.ajax({
+                    url: '/cpu_usage',
+                    method: 'GET',
+                    success: function(data) {
+                        var currentTime = new Date().toLocaleTimeString();
+                        cpuChart.data.labels.push(currentTime); // 현재 시간 추가
+                        cpuChart.data.datasets[0].data.push(data.cpu); // CPU 사용량 추가
+
+                        // CPU 사용량 업데이트
+                        document.getElementById('cpu').textContent = data.cpu + '%';
+
+                        if (cpuChart.data.labels.length > 10) { // 데이터가 10개를 넘으면 가장 오래된 것 제거
+                            cpuChart.data.labels.shift();
+                            cpuChart.data.datasets[0].data.shift();
+                        }
+
+                        cpuChart.update();
+                    }
+                });
+            }
+
+            setInterval(updateCpuUsage, 1000); // 매 1 초마다 CPU 사용량 업데이트
+        });
+    </script>
+
+    <!-- 네트워크 그래프 -->
+    <script>
+        const socket = io();
+
+        // 네트워크 IN 트래픽 그래프
+        const inTrafficCtx = document.getElementById('inTrafficChart').getContext('2d');
+        const inTrafficChart = new Chart(inTrafficCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'IN Traffic (bytes/sec)',
+                    data: [],
+                    backgroundColor: 'rgba(180, 85, 162, 0.2)',
+                    borderColor: 'rgba(180, 85, 162, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                            ticks: {
+                                min: 0,
+                                max: 30000,
+                            }
+                        }]
+                }
+            }
+        });
+
+        // 네트워크 OUT 트래픽 그래프
+        const outTrafficCtx = document.getElementById('outTrafficChart').getContext('2d');
+        const outTrafficChart = new Chart(outTrafficCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'OUT Traffic (bytes/sec)',
+                    data: [],
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                            ticks: {
+                                min: 0,
+                                max: 30000,
+                            }
+                        }]
+                }
+            }
+        });
+
+        // 서버로부터 실시간 데이터 수신
+        socket.on('network_data', function(data) {
+            const interfaces = Object.keys(data);
+            const inTraffic = interfaces.map(interface => data[interface].in);
+            const outTraffic = interfaces.map(interface => data[interface].out);
+
+            // IN 트래픽 그래프 업데이트
+            inTrafficChart.data.labels = interfaces;
+            inTrafficChart.data.datasets[0].data = inTraffic;
+            inTrafficChart.update();
+
+            // OUT 트래픽 그래프 업데이트
+            outTrafficChart.data.labels = interfaces;
+            outTrafficChart.data.datasets[0].data = outTraffic;
+            outTrafficChart.update();
+        });
+
+        // 1초마다 데이터 요청
+        setInterval(function() {
+            socket.emit('request_network_data');
+        }, 1000);
+    </script>
+
+<script>
+    var socket2 = io();
+
+    socket2.on('network_data2', function(data) {
+        var tableBody = document.getElementById('traffic_data2');
+        tableBody.innerHTML = '';  // 기존 데이터를 비웁니다.
+
+        for (var interface in data) {
+            var row = '<tr>' +
+                '<td>' + interface + '</td>' +
+                '<td>' + data[interface].bytes_sent + '</td>' +
+                '<td>' + data[interface].bytes_recv + '</td>' +
+                '<td>' + data[interface].packets_sent + '</td>' +
+                '<td>' + data[interface].packets_recv + '</td>' +
+                '<td>' + data[interface].errin + '</td>' +
+                '<td>' + data[interface].errout + '</td>' +
+                '<td>' + data[interface].dropin + '</td>' +
+                '<td>' + data[interface].dropout + '</td>' +
+                '</tr>';
+            tableBody.innerHTML += row;
+        }
+    });
+</script>
+
+</body>
+
+</html>

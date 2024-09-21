@@ -1,3 +1,4 @@
+/* 직접 수정 */
 .margin-left-10{
     margin-left: 30px;
 }
@@ -12,4 +13,13 @@
 
 .padding-top-10{
     padding-top: 30px;
+}
+
+
+/* 대시보드 System Information 테스트용 */
+.card-body .row:nth-child(odd) {
+    background-color: #f8f9fc; /* 밝은 회색 */
+}
+.card-body .row:nth-child(even) {
+    background-color: #ffffff; /* 흰색 */
 }
