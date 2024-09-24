@@ -312,78 +312,175 @@
                     <h1 class="h3 mb-4 text-gray-800">NAT 포트 포워딩</h1>
 
                     <!-- 버튼을 클릭하면 모달이 나타남 -->
-                    <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#blockIpModal">PREROUTING 추가</button>
-                    <!-- Add BGP Protocol Button -->
-                    <button type="button" class="btn btn-success mt-3 " data-toggle="modal" data-target="#addModal">POSTROUTIN 추가</button>
+                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blockIpModal">POSTROUTING 추가</button>
+                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">POSTROUTING 삭제</button>
+                    <br>
+                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#blockIpModal2">PREROUTING 추가</button>
+                    <button class="btn btn-warning mb-3" data-toggle="modal" data-target="#blockIpModal4">PREROUTING 삭제</button>
 
-                    <!-- 포트 포워딩 추가 모달 -->
+                    <!-- POSTROUTING 추가 모달 -->
                     <div class="modal fade" id="blockIpModal" tabindex="-1" role="dialog" aria-labelledby="blockIpModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="blockIpModalLabel">포트 포워딩 추가</h5>
+                                    <h5 class="modal-title" id="blockIpModalLabel">POSTROUTING 추가</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <form id="add-route-form">
-                                        <div class="form-group">
-                                            <label for="chain">Chain 선택</label>
-                                            <input type="text" class="form-control" id="chain" placeholder="예: prerouting || postrouting" required>
-                                        </div>
+                                    <form id="postrouting-form">
                                         <div class="form-group">
                                             <label for="inip">내부 IP 주소</label>
-                                            <input type="text" class="form-control" id="inip" placeholder="예: 192.168.10.0" required>
+                                            <input type="text" class="form-control" id="inip" placeholder="예: 192.168.0.0" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="exip">외부 IP 주소</label>
-                                            <input type="text" class="form-control" id="exip" placeholder="예: 192.168.10.0" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="outport">외부 포트</label>
-                                            <input type="text" class="form-control" id="outport" placeholder="예: 8080" required>
+                                            <input type="text" class="form-control" id="exip" placeholder="예: 240.0.10.0" required>
                                         </div>
                                         <div class="form-group">
                                             <label for="inport">내부 포트</label>
                                             <input type="text" class="form-control" id="inport" placeholder="예: 5000" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="protocol">프로토콜</label>
-                                            <input type="text" class="form-control" id="protocol" placeholder="예: tcp" required>
+                                            <label for="outport">외부 포트</label>
+                                            <input type="text" class="form-control" id="outport" placeholder="예: 8080" required>
                                         </div>
                                         <div class="form-group">
-                                            <label for="name">규칙 이름</label>
-                                            <input type="text" class="form-control" id="name" placeholder="예: 인바운드 규칙..." required>
+                                            <label for="protocol">프로토콜</label>
+                                            <input type="text" class="form-control" id="protocol" placeholder="예: tcp" required>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" id="add-route-button">추가</button>
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">추가</button>
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <br> <br>
+                    <!-- PREROUTING 추가 모달 -->
+                    <div class="modal fade" id="blockIpModal2" tabindex="-1" role="dialog" aria-labelledby="blockIpModal2Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModal2Label">PREROUTING 추가</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="prerouting-form">
+                                        <div class="form-group">
+                                            <label for="inip">내부 IP 주소</label>
+                                            <input type="text" class="form-control" id="inip2" placeholder="예: 192.168.10.0" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exip">외부 IP 주소</label>
+                                            <input type="text" class="form-control" id="exip2" placeholder="예: 240.0.10.0" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inport">내부 포트</label>
+                                            <input type="text" class="form-control" id="inport2" placeholder="예: 5000" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="outport">외부 포트</label>
+                                            <input type="text" class="form-control" id="outport2" placeholder="예: 8080" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="protocol">프로토콜</label>
+                                            <input type="text" class="form-control" id="protocol2" placeholder="예: tcp" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" data-dismiss="modal">추가</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- POSTROUTING 삭제 모달 -->
+                    <div class="modal fade" id="blockIpModal3" tabindex="-1" role="dialog" aria-labelledby="blockIpModal3Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModal3Label">POSTROUTING 삭제</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="postrouting-form">
+                                        <div class="form-group">
+                                            <label for="num">해당 번호</label>
+                                            <input type="text" class="form-control" id="num" placeholder="해당 되는 num을 입력하세요." required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">삭제</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PREROUTING 삭제 모달 -->
+                    <div class="modal fade" id="blockIpModal4" tabindex="-1" role="dialog" aria-labelledby="blockIpModal4Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModal4Label">PREROUTING 삭제</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="prerouting-form">
+                                        <div class="form-group">
+                                            <label for="num">해당 번호</label>
+                                            <input type="text" class="form-control" id="num" placeholder="해당 되는 num을 입력하세요." required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-warning" data-dismiss="modal">삭제</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+
+                    <br>
 
                     <!-- 포트 포워딩 테이블 -->
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">포트 포워딩 목록</h4>
+                            <h4 class="card-title">NAT 리스트 목록</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th>IP 주소</th>
-                                            <th>외부 포트</th>
-                                            <th>내부 포트</th>
-                                            <th>프로토콜</th>
-                                            <th>규칙 이름</th>
-                                            <th>Actions</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody id="port-list">
@@ -393,6 +490,8 @@
                             </div>
                         </div>
                     </div>
+
+                    
 
 
                 </div>
@@ -432,6 +531,263 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+    <!-- NAT 룰 추가 -->
+    <!-- <script>
+        function submitForm(type) {
+            let formData = {};
+            if (type === 'postrouting') {
+                formData = {
+                    inip: document.getElementById('inip').value,
+                    exip: document.getElementById('exip').value,
+                    inport: document.getElementById('inport').value,
+                    outport: document.getElementById('outport').value,
+                    protocol: document.getElementById('protocol').value,
+                    type: 'postrouting'
+                };
+            } else {
+                formData = {
+                    inip: document.getElementById('inip2').value,
+                    exip: document.getElementById('exip2').value,
+                    inport: document.getElementById('inport2').value,
+                    outport: document.getElementById('outport2').value,
+                    protocol: document.getElementById('protocol2').value,
+                    type: 'prerouting'
+                };
+            }
+
+            fetch('/add_nat_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script> -->
+
+
+    
+    
+
+    
+
+    <!-- NAT 리스트 조회 1. -->
+    <!-- <script>
+        async function fetchPortForwardingRules() {
+            try {
+                const response = await fetch('/nat/rules');
+                const data = await response.json();
+    
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+    
+                const rules = data.output.split('\n').slice(2); // 첫 두 줄은 헤더로 건너뜁니다.
+                const portList = document.getElementById('port-list');
+                portList.innerHTML = ''; // 기존 내용 초기화
+    
+                rules.forEach(rule => {
+                    const columns = rule.split(/\s+/);
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        // 각 열에 맞는 데이터를 추가
+                        row.innerHTML = `
+                            <td>${columns[0]}</td> 
+                            <td>${columns[1]}</td> 
+                            <td>${columns[2]}</td> 
+                            <td>${columns[3]}</td> 
+                            <td>${columns[4]}</td> 
+                            <td>${columns[5]}</td> 
+                            <td>${columns[6]}</td> 
+                            <td>${columns[7]}</td> 
+                            <td>${columns[8]}</td> 
+                            <td>${columns[9]}</td> 
+                            <td>${columns[10]}</td> 
+                            <td>${columns[11]}</td> 
+                            <td>${columns[13]}</td> 
+                            <td><button class="btn btn-danger" onclick="deleteRule('${columns[13]}')">삭제</button></td>
+                        `;
+                        portList.appendChild(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching NAT rules:', error);
+            }
+        }
+    
+        // 페이지가 로드될 때 규칙을 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchPortForwardingRules);
+    </script> -->
+
+    <!-- NAT 리스트 조회 2. -->
+    <script>
+        async function fetchPortForwardingRules() {
+            try {
+                const response = await fetch('/nat/rules');
+                const data = await response.json();
+    
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+    
+                const rules = data.output.split('\n').slice(); // 첫 두 줄은 헤더로 건너뜁니다.
+                const portList = document.getElementById('port-list');
+                portList.innerHTML = ''; // 기존 내용 초기화
+    
+                if (rules.length === 0 || rules[0].trim() === "") {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="14" class="text-center">No NAT rules available</td>`;
+                    portList.appendChild(row);
+                    return;
+                }
+    
+                rules.forEach(rule => {
+                    const columns = rule.split(/\s+/);
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        // 각 열에 맞는 데이터를 추가하고 값이 없으면 "..."을 기본값으로 출력
+                        row.innerHTML = `
+                            <td>${columns[0] || ""}</td> 
+                            <td>${columns[1] || ""}</td> 
+                            <td>${columns[2] || ""}</td> 
+                            <td>${columns[3] || ""}</td> 
+                            <td>${columns[4] || ""}</td> 
+                            <td>${columns[5] || ""}</td> 
+                            <td>${columns[6] || ""}</td> 
+                            <td>${columns[7] || ""}</td> 
+                            <td>${columns[8] || ""}</td> 
+                            <td>${columns[9] || ""}</td> 
+                            <td>${columns[10] || ""}</td> 
+                            <td>${columns[11] || ""}</td> 
+                            <td>${columns[13] || ""}</td> 
+                        `;
+                        portList.appendChild(row);
+                    }
+                    // <td><button class="btn btn-danger" onclick="deleteRule('${columns[13] || ''}')">삭제</button></td>
+                });
+            } catch (error) {
+                console.error('Error fetching NAT rules:', error);
+            }
+        }
+    
+        // 페이지가 로드될 때 규칙을 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchPortForwardingRules);
+    </script>
+
+    <!-- NAT 규칙 삭제 -->
+    <script>
+        // POSTROUTING 규칙 삭제 요청
+        document.querySelector('#blockIpModal3 .btn-danger').addEventListener('click', function() {
+            var num = document.querySelector('#blockIpModal3 #num').value;
+            fetch('/delete_postrouting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num: num })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 성공 시 추가 동작
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // PREROUTING 규칙 삭제 요청
+        document.querySelector('#blockIpModal4 .btn-warning').addEventListener('click', function() {
+            var num = document.querySelector('#blockIpModal4 #num').value;
+            fetch('/delete_prerouting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num: num })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 성공 시 추가 동작
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
+
+    <script>
+        // POSTROUTING 추가
+        $('#blockIpModal .btn-primary').on('click', function() {
+            var postData = {
+                inip: $('#inip').val(),
+                exip: $('#exip').val(),
+                inport: $('#inport').val(),
+                outport: $('#outport').val(),
+                protocol: $('#protocol').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/add_postrouting',
+                data: postData,
+                success: function(response) {
+                    alert(response.message);
+                },
+                error: function(response) {
+                    alert('Error: ' + response.responseJSON.message);
+                }
+            });
+        });
+
+        // PREROUTING 추가
+        $('#blockIpModal2 .btn-success').on('click', function() {
+            var postData = {
+                inip: $('#inip2').val(),
+                exip: $('#exip2').val(),
+                inport: $('#inport2').val(),
+                outport: $('#outport2').val(),
+                protocol: $('#protocol2').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/add_prerouting',
+                data: postData,
+                success: function(response) {
+                    alert(response.message);
+                },
+                error: function(response) {
+                    alert('Error: ' + response.responseJSON.message);
+                }
+            });
+        });
+    </script>
+        
 
 </body>
 

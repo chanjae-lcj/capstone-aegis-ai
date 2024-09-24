@@ -11,6 +11,7 @@ from nat import list_nat_rules, run_nat_command
 from flask_socketio import SocketIO
 import threading
 import time
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션을 위한 비밀키 설정
@@ -516,7 +517,101 @@ def delete_rule():
         return jsonify({"error": result["error"]}), 500
     
     return jsonify({"output": result["output"]})
+# ----------------------------------------------------------------------------
 
+
+#--------------------------------------------------- NAT 시작.
+# NAT 규칙 조회 API
+@app.route('/nat/rules', methods=['GET'])
+def get_nat_rules():
+    result = list_nat_rules()
+    if result['error']:
+        return jsonify({"error": result['error']}), 500
+    return jsonify({"output": result['output']}), 200
+
+# NAT 명령어 실행 API
+@app.route('/nat/command', methods=['POST'])
+def run_custom_nat_command():
+    # 클라이언트가 보낸 명령어를 가져온다
+    command_data = request.json
+    command = command_data.get("command")
+    
+    if not command:
+        return jsonify({"error": "No command provided"}), 400
+    
+    result = run_nat_command(command)
+    
+    if result['error']:
+        return jsonify({"error": result['error']}), 500
+    return jsonify({"output": result['output']}), 200
+
+
+@app.route('/add_postrouting', methods=['POST'])
+def add_postrouting():
+    try:
+        in_ip = request.form['inip']
+        ex_ip = request.form['exip']
+        in_port = request.form['inport']
+        out_port = request.form['outport']
+        protocol = request.form['protocol']
+
+        # POSTROUTING 규칙 추가 명령어
+        cmd = f"sudo iptables -t nat -A POSTROUTING -s {in_ip} -p {protocol} --sport {in_port} -j SNAT --to-source {ex_ip}:{out_port}"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        return jsonify({'status': 'success', 'message': 'POSTROUTING 규칙이 추가되었습니다.'}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/add_prerouting', methods=['POST'])
+def add_prerouting():
+    try:
+        in_ip = request.form['inip']
+        ex_ip = request.form['exip']
+        in_port = request.form['inport']
+        out_port = request.form['outport']
+        protocol = request.form['protocol']
+
+        # PREROUTING 규칙 추가 명령어
+        cmd = f"sudo iptables -t nat -A PREROUTING -d {ex_ip} -p {protocol} --dport {out_port} -j DNAT --to-destination {in_ip}:{in_port}"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        return jsonify({'status': 'success', 'message': 'PREROUTING 규칙이 추가되었습니다.'}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# NAT 규칙 삭제 - POSTROUTING
+@app.route('/delete_postrouting', methods=['POST'])
+def delete_postrouting():
+    try:
+        num = request.json.get('num')  # 사용자가 입력한 num 값 받기
+        # iptables 명령어 실행 (POSTROUTING 규칙 삭제)
+        cmd = f"sudo iptables -t nat -D POSTROUTING {num}"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            return jsonify({'success': True, 'message': 'POSTROUTING 규칙이 삭제되었습니다.'})
+        else:
+            return jsonify({'success': False, 'message': f'오류: {result.stderr}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'서버 오류: {str(e)}'})
+
+# NAT 규칙 삭제 - PREROUTING
+@app.route('/delete_prerouting', methods=['POST'])
+def delete_prerouting():
+    try:
+        num = request.json.get('num')  # 사용자가 입력한 num 값 받기
+        # iptables 명령어 실행 (PREROUTING 규칙 삭제)
+        cmd = f"sudo iptables -t nat -D PREROUTING {num}"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            return jsonify({'success': True, 'message': 'PREROUTING 규칙이 삭제되었습니다.'})
+        else:
+            return jsonify({'success': False, 'message': f'오류: {result.stderr}'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'서버 오류: {str(e)}'})
+#--------------------------------------------------- NAT 끝.
 
 
 
