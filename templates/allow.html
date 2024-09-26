@@ -421,6 +421,7 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
+    <!-- 규칙 테이블 조회 -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Fetch iptables rules from the server
@@ -495,8 +496,44 @@
         
             // 페이지 로드 시 규칙 불러오기
             fetchIptablesRules();
-            });
-        </script>
+            
+
+
+
+                document.getElementById('blockIpButton').addEventListener('click', function() {
+                const ipAddress = document.getElementById('ipAddress').value;
+                const portNumber = document.getElementById('portNumber').value;
+                const protocol = document.getElementById('protocol').value;
+
+                const data = {
+                    ipAddress: ipAddress,
+                    portNumber: portNumber,
+                    protocol: protocol
+                };
+
+                fetch('/allow_ip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        fetchIptablesRules(); // 규칙 추가 후 목록 새로고침
+                    } else {
+                        alert('오류: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+                });
+        });
+    </script>
+
 
 </body>
 

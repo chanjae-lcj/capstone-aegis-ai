@@ -417,7 +417,7 @@ def nat_list():
     
     return jsonify({"output": result["output"]})
 
-# -------------------- gh.w --------------------------
+# -------------------- gh.w --------------------------   ip 차단 시작.
 
 
 # 차단된 IP, 포트 목록 가져오기
@@ -517,7 +517,36 @@ def delete_rule():
         return jsonify({"error": result["error"]}), 500
     
     return jsonify({"output": result["output"]})
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------- ip 차단 끝.
+
+
+# ------------------------------------------------------------------- ip 허용 시작.
+
+# IP 허용 규칙 추가 API
+@app.route('/allow_ip', methods=['POST'])
+def allow_ip():
+    data = request.get_json()
+    ip_address = data.get('ipAddress')
+    port = data.get('portNumber')
+    protocol = data.get('protocol', 'tcp')  # 기본 프로토콜은 TCP
+
+    if not ip_address:
+        return jsonify({'error': 'IP 주소가 필요합니다.'}), 400
+
+    # iptables 명령어 생성 (포트와 프로토콜 포함 여부에 따라 달라집니다)
+    if port:
+        command = f"sudo iptables -A INPUT -p {protocol} --dport {port} -s {ip_address} -j ACCEPT"
+    else:
+        command = f"sudo iptables -A INPUT -s {ip_address} -j ACCEPT"
+
+    # iptables 명령어 실행
+    try:
+        subprocess.run(command, shell=True, check=True)
+        return jsonify({'message': 'IP 허용 규칙이 성공적으로 추가되었습니다.'})
+    except subprocess.CalledProcessError as e:
+        return jsonify({'error': f'iptables 명령어 실행 중 오류 발생: {e}'}), 500
+
+# ------------------------------------------------------------------- ip 허용 끝.
 
 
 #--------------------------------------------------- NAT 시작.
