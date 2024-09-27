@@ -312,11 +312,8 @@
                     <h1 class="h3 mb-4 text-gray-800">NAT 포트 포워딩</h1>
 
                     <!-- 버튼을 클릭하면 모달이 나타남 -->
-                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blockIpModal">POSTROUTING 추가</button>
-                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">POSTROUTING 삭제</button>
-                    <br>
-                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#blockIpModal2">PREROUTING 추가</button>
-                    <button class="btn btn-warning mb-3" data-toggle="modal" data-target="#blockIpModal4">PREROUTING 삭제</button>
+                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#blockIpModal2">포트 포워딩 규칙 추가</button>
+                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal4">포트 포워딩 규칙 삭제</button>
 
                     <!-- POSTROUTING 추가 모달 -->
                     <div class="modal fade" id="blockIpModal" tabindex="-1" role="dialog" aria-labelledby="blockIpModalLabel" aria-hidden="true">
@@ -447,7 +444,7 @@
                                     </form>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-warning" data-dismiss="modal">삭제</button>
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">삭제</button>
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
                                 </div>
                             </div>
@@ -461,7 +458,7 @@
                     <!-- 포트 포워딩 테이블 -->
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">NAT 리스트 목록</h4>
+                            <h4 class="card-title">NAT 포트 포워딩 규칙 목록 (PREROUTING)</h4>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -536,7 +533,7 @@
     <script>
         async function fetchPortForwardingRules() {
             try {
-                const response = await fetch('/nat/rules');
+                const response = await fetch('/nat/pre/rules');
                 const data = await response.json();
     
                 if (data.error) {
@@ -616,7 +613,7 @@
         });
 
         // PREROUTING 규칙 삭제 요청
-        document.querySelector('#blockIpModal4 .btn-warning').addEventListener('click', function() {
+        document.querySelector('#blockIpModal4 .btn-danger').addEventListener('click', function() {
             var num = document.querySelector('#blockIpModal4 #num').value;
             fetch('/delete_prerouting', {
                 method: 'POST',

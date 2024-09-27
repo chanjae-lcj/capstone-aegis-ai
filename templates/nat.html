@@ -311,6 +311,159 @@
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">플로팅 아이피</h1>
 
+                    <!-- 버튼을 클릭하면 모달이 나타남 -->
+                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#blockIpModal5">인터페이스 설정</button>
+                    <br>
+
+                    <!-- Content Row 첫 번째 컨텐츠 부분-->
+                    <div class="row">
+
+                        <!-- 시스템 인포메이션 카드 부분 -->
+                        <div class="col-xl-5 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">네트워크 인터페이스</h4>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <div class="text-left text-gray-800 font-weight-bold">
+                                        <span id="net_info">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>  
+
+                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blockIpModal">플로팅 아이피 생성</button>
+                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">플로팅 아이피 삭제</button>
+
+                    <!-- POSTROUTING 추가 모달 -->
+                    <div class="modal fade" id="blockIpModal" tabindex="-1" role="dialog" aria-labelledby="blockIpModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModalLabel">POSTROUTING 추가</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="postrouting-form">
+                                        <div class="form-group">
+                                            <label for="inip">사설 IP 주소</label>
+                                            <input type="text" class="form-control" id="inip" placeholder="예: 10.0.0.0/8" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="exip">공인 IP 주소</label>
+                                            <input type="text" class="form-control" id="exip" placeholder="예: 192.0.0.1" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="inf">인터페이스</label>
+                                            <input type="text" class="form-control" id="inf" placeholder="예: enp0s8" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal">추가</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- POSTROUTING 삭제 모달 -->
+                    <div class="modal fade" id="blockIpModal3" tabindex="-1" role="dialog" aria-labelledby="blockIpModal3Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModal3Label">POSTROUTING 삭제</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="postrouting-form">
+                                        <div class="form-group">
+                                            <label for="num">해당 번호</label>
+                                            <input type="text" class="form-control" id="num" placeholder="해당 되는 num을 입력하세요." required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">삭제</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 인터페이스 설정 모달 -->
+                    <div class="modal fade" id="blockIpModal5" tabindex="-1" role="dialog" aria-labelledby="blockIpModal5Label" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="blockIpModal5Label">인터페이스 설정</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="postrouting-form">
+                                        <div class="form-group">
+                                            <label for="floting_ip">네트워크 IP 주소</label>
+                                            <input type="text" class="form-control" id="floting_ip" placeholder="예: 210.115.229.17" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="floting_inf">인터페이스</label>
+                                            <input type="text" class="form-control" id="floting_inf" placeholder="예: enp0s3" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" data-dismiss="modal">설정</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <!-- 포트 포워딩 테이블 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">NAT 플로팅 IP 규칙 목록 (POSTROUTING)</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="port-list">
+                                    <!-- 포트 포워딩 목록이 여기에 동적으로 추가됩니다 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
 
                 </div>
                 <!-- !!! 메인 컨텐츠 부분 !!! -->
@@ -349,6 +502,188 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+    <!-- NAT 리스트 조회 -->
+    <script>
+        async function fetchPortForwardingRules() {
+            try {
+                const response = await fetch('/nat/post/rules');
+                const data = await response.json();
+    
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+    
+                const rules = data.output.split('\n').slice(); // 첫 두 줄은 헤더로 건너뜁니다.
+                const portList = document.getElementById('port-list');
+                portList.innerHTML = ''; // 기존 내용 초기화
+    
+                if (rules.length === 0 || rules[0].trim() === "") {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="14" class="text-center">No NAT rules available</td>`;
+                    portList.appendChild(row);
+                    return;
+                }
+    
+                rules.forEach(rule => {
+                    const columns = rule.split(/\s+/);
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        // 각 열에 맞는 데이터를 추가하고 값이 없으면 "..."을 기본값으로 출력
+                        row.innerHTML = `
+                            <td>${columns[0] || ""}</td> 
+                            <td>${columns[1] || ""}</td> 
+                            <td>${columns[2] || ""}</td> 
+                            <td>${columns[3] || ""}</td> 
+                            <td>${columns[4] || ""}</td> 
+                            <td>${columns[5] || ""}</td> 
+                            <td>${columns[6] || ""}</td> 
+                            <td>${columns[7] || ""}</td> 
+                            <td>${columns[8] || ""}</td> 
+                            <td>${columns[9] || ""}</td> 
+                            <td>${columns[10] || ""}</td> 
+                            <td>${columns[11] || ""}</td> 
+                            <td>${columns[13] || ""}</td> 
+                        `;
+                        portList.appendChild(row);
+                    }
+                    // <td><button class="btn btn-danger" onclick="deleteRule('${columns[13] || ''}')">삭제</button></td>
+                });
+            } catch (error) {
+                console.error('Error fetching NAT rules:', error);
+            }
+        }
+    
+        // 페이지가 로드될 때 규칙을 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchPortForwardingRules);
+    </script>
+
+    <!-- NAT 규칙 삭제 -->
+    <script>
+        // POSTROUTING 규칙 삭제 요청
+        document.querySelector('#blockIpModal3 .btn-danger').addEventListener('click', function() {
+            var num = document.querySelector('#blockIpModal3 #num').value;
+            fetch('/delete_postrouting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num: num })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 성공 시 추가 동작
+                    fetchPortForwardingRules();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // PREROUTING 규칙 삭제 요청
+        document.querySelector('#blockIpModal4 .btn-warning').addEventListener('click', function() {
+            var num = document.querySelector('#blockIpModal4 #num').value;
+            fetch('/delete_prerouting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num: num })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 성공 시 추가 동작
+                    fetchPortForwardingRules();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+
+
+    <script>
+        // POSTROUTING 추가
+        $('#blockIpModal .btn-primary').on('click', function() {
+            var postData = {
+                inip: $('#inip').val(),
+                exip: $('#exip').val(),
+                inf: $('#inf').val()
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/add_postrouting',
+                data: postData,
+                success: function(response) {
+                    alert(response.message);
+                    fetchPortForwardingRules();
+                },
+                error: function(response) {
+                    alert('Error: ' + response.responseJSON.message);
+                }
+            });
+        });
+
+        // 인터페이스 설정
+        $('#blockIpModal5 .btn-success').on('click', function() {
+            var postData = {
+                ip: $('#floting_ip').val(),
+                inf: $('#floting_inf').val(),
+            };
+
+            $.ajax({
+                type: 'POST',
+                url: '/floting/interface/add',
+                data: postData,
+                success: function(response) {
+                    alert(response.message);
+                    fetchPortForwardingRules();
+                },
+                error: function(response) {
+                    alert('Error: ' + response.responseJSON.message);
+                }
+            });
+        });
+    </script>
+
+    <!-- os 정보 -->
+    <script>
+        // 시스템 정보 가져오는 함수
+        function fetchOSInfo() {
+            fetch('/os_info')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('error').textContent = data.error;
+                    } else {
+                        // 데이터를 각각의 HTML 요소에 표시
+                        document.getElementById('net_info').textContent = data.net_info;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching system info:', error);
+                    document.getElementById('error').textContent = 'Failed to fetch system information.';
+                });
+        }
+
+        // 페이지 로드 시 OS 정보를 업데이트
+        window.onload = function() {
+            fetchOSInfo();             // OS 정보 업데이트
+        };
+    </script>
+
 
 </body>
 

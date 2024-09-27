@@ -12,10 +12,18 @@ def run_nat_command(command):
 
 
 # 차단된 규칙 목록 (INPUT 체인만, 포트와 IP 표시) 가져오기 함수
-def list_nat_rules():
+# post 라우팅 규칙 조회
+def list_post_rules():
     # INPUT 체인에서 IP와 포트 정보를 포함한 상세 규칙을 가져오는 명령어
     # command = "sudo iptables -t nat -L -n -v"
-    command = "sudo iptables -t nat -L -v -n --line-number"
+    command = "sudo iptables -t nat -L POSTROUTING -v -n --line-number"
+    return run_nat_command(command)
+
+# pre 라우팅 규칙 조회
+def list_pre_rules():
+    # INPUT 체인에서 IP와 포트 정보를 포함한 상세 규칙을 가져오는 명령어
+    # command = "sudo iptables -t nat -L -n -v"
+    command = "sudo iptables -t nat -L PREROUTING -v -n --line-number"
     return run_nat_command(command)
 
 

@@ -353,7 +353,7 @@
 
 <div class="card">
   <div class="card-header">
-    <h4 class="card-title">방화벽 접근 규칙</h4>
+    <h4 class="card-title">방화벽 접근 규칙 (차단)</h4>
   </div>
   <div class="card-body">
     <div class="table-responsive">
@@ -420,124 +420,128 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Fetch iptables rules from the server
-    function fetchIptablesRules() {
-        fetch('/iptables/list')
-            .then(response => response.json())
-            .then(data => {
-                const output = data.output;
-
-                // Split the output by lines and process it
-                const lines = output.split('\n');
-                const tableBody = document.getElementById('iptables-table-body');
-                tableBody.innerHTML = '';  // Clear previous content
-
-                let currentChain = '';
-
-                lines.forEach(line => {
-                    line = line.trim();
-
-                    if (line.startsWith('Chain')) {
-                        // 체인이 시작되면 currentChain을 설정
-                        const chainInfo = line.split(' ');
-                        currentChain = chainInfo[1];  // 체인 이름 저장
-                    } else if (line.match(/^\d+/)) {
-                        // Process the actual rules using a regex to handle spaces between columns
-                        const columns = line.match(/(\S+)/g);  // 공백을 기준으로 컬럼 구분
-                        if (columns.length >= 10) {  // 적절한 데이터 개수 확인
-                            tableBody.innerHTML += `<tr>
-                                <td>${columns[0]}</td>  <!-- Num -->
-                                <td>${columns[1]}</td>  <!-- Pkts -->
-                                <td>${columns[2]}</td>  <!-- Bytes -->
-                                <td>${columns[3]}</td>  <!-- Target -->
-                                <td>${columns[4]}</td>  <!-- Prot -->
-                                <td>${columns[5]}</td>  <!-- Opt -->
-                                <td>${columns[6]}</td>  <!-- In -->
-                                <td>${columns[7]}</td>  <!-- Out -->
-                                <td>${columns[8]}</td>  <!-- Source -->
-                                <td>${columns[9]}</td>  <!-- Destination -->
-                                <td><button class="btn btn-danger delete-btn" data-chain="${currentChain}" data-line="${columns[0]}">삭제</button></td>
-                            </tr>`;
-                        }
-                    }
-                });
-
-                // Add event listeners to delete buttons
-                document.querySelectorAll('.delete-btn').forEach(button => {
-                    button.addEventListener('click', function () {
-                        const lineNumber = this.getAttribute('data-line');
-                        const chain = this.getAttribute('data-chain');
-
-                        fetch('/iptables/delete_rule', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ line_number: lineNumber, chain: chain })
-                        })
-                            .then(response => {
-                                if (response.ok) {
-                                    alert('규칙 삭제 성공');
-                                    fetchIptablesRules(); // 삭제 후 규칙 다시 불러오기
-                                } else {
-                                    alert('규칙 삭제 실패');
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Fetch iptables rules from the server
+            function fetchIptablesRules() {
+                fetch('/iptables/list/drop')
+                    .then(response => response.json())
+                    .then(data => {
+                        const output = data.output;
+        
+                        // Split the output by lines and process it
+                        const lines = output.split('\n');
+                        const tableBody = document.getElementById('iptables-table-body');
+                        tableBody.innerHTML = '';  // Clear previous content
+        
+                        let currentChain = '';
+        
+                        lines.forEach(line => {
+                            line = line.trim();
+        
+                            if (line.startsWith('Chain')) {
+                                // 체인이 시작되면 currentChain을 설정
+                                const chainInfo = line.split(' ');
+                                currentChain = chainInfo[1];  // 체인 이름 저장
+                            } else if (line.match(/^\d+/)) {
+                                // Process the actual rules using a regex to handle spaces between columns
+                                const columns = line.match(/(\S+)/g);  // 공백을 기준으로 컬럼 구분
+                                if (columns.length >= 10) {  // 적절한 데이터 개수 확인
+                                    tableBody.innerHTML += `<tr>
+                                        <td>${columns[0]}</td>  <!-- Num -->
+                                        <td>${columns[1]}</td>  <!-- Pkts -->
+                                        <td>${columns[2]}</td>  <!-- Bytes -->
+                                        <td>${columns[3]}</td>  <!-- Target -->
+                                        <td>${columns[4]}</td>  <!-- Prot -->
+                                        <td>${columns[5]}</td>  <!-- Opt -->
+                                        <td>${columns[6]}</td>  <!-- In -->
+                                        <td>${columns[7]}</td>  <!-- Out -->
+                                        <td>${columns[8]}</td>  <!-- Source -->
+                                        <td>${columns[9]}</td>  <!-- Destination -->
+                                        <td><button class="btn btn-danger delete-btn" data-chain="${currentChain}" data-line="${columns[0]}">삭제</button></td>
+                                    </tr>`;
                                 }
-                            })
-                            .catch(error => console.error('Error deleting rule:', error));
-                    });
-                });
-            })
-            .catch(error => console.error('Error fetching iptables data:', error));
-    }
-
-    // 페이지 로드 시 규칙 불러오기
-    fetchIptablesRules();
-
-    // **IP/Port 차단 폼 처리**
-    document.getElementById('blockIpButton').addEventListener('click', function () {
-        const ip = document.getElementById('ipAddress').value;
-        const port = document.getElementById('portNumber').value;
-        const protocol = document.getElementById('protocol').value;
-
-        let endpoint = '';
-        let data = { ip: ip };
-
-        if (ip && port) {
-            endpoint = '/iptables/block_ip_port';  // IP와 포트 둘 다 있으면 이 엔드포인트
-            data.port = port;
-            data.protocol = protocol;
-        } else if (ip) {
-            endpoint = '/iptables/block_ip';  // IP만 있을 경우
-        } else {
-            alert('IP 주소를 입력하세요');
-            return;
-        }
-
-        // 차단 요청 보내기
-        fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('차단 성공');
-                    fetchIptablesRules(); // IP/Port 차단 후 규칙 다시 불러오기
+                            }
+                        });
+        
+                        // Add event listeners to delete buttons
+                        document.querySelectorAll('.delete-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                const lineNumber = this.getAttribute('data-line');
+                                const chain = this.getAttribute('data-chain');
+        
+                                fetch('/iptables/delete_rule', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({ line_number: lineNumber, chain: chain })
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            alert('규칙 삭제 성공');
+                                            fetchIptablesRules(); // 삭제 후 규칙 다시 불러오기
+                                        } else {
+                                            alert('규칙 삭제 실패');
+                                        }
+                                    })
+                                    .catch(error => console.error('Error deleting rule:', error));
+                            });
+                        });
+                    })
+                    .catch(error => console.error('Error fetching iptables data:', error));
+            }
+        
+            // 페이지 로드 시 규칙 불러오기
+            fetchIptablesRules();
+        
+            // **IP/Port 차단 폼 처리**
+            document.getElementById('blockIpButton').addEventListener('click', function () {
+                const ip = document.getElementById('ipAddress').value;
+                const port = document.getElementById('portNumber').value;
+                const protocol = document.getElementById('protocol').value;
+        
+                let endpoint = '';
+                let data = { ip: ip };
+        
+                if (ip && port) {
+                    endpoint = '/iptables/block_ip_port';  // IP와 포트 둘 다 있으면 이 엔드포인트
+                    data.port = port;
+                    data.protocol = protocol;
+                } else if (ip) {
+                    endpoint = '/iptables/block_ip';  // IP만 있을 경우
                 } else {
-                    alert('차단 실패');
+                    alert('IP 주소를 입력하세요');
+                    return;
                 }
-            })
-            .catch(error => console.error('Error blocking IP/Port:', error));
-    });
-});
+        
+                // 차단 요청 보내기
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('차단 성공');
+                            fetchIptablesRules(); // IP/Port 차단 후 규칙 다시 불러오기
+                        } else {
+                            alert('차단 실패');
+                        }
+                    })
+                    .catch(error => console.error('Error blocking IP/Port:', error));
+            });
+        });
+        
+        
+        
+        </script>
 
 
 
-</script>
+
 
 </body>
 

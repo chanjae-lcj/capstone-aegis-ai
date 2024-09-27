@@ -426,7 +426,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             // Fetch iptables rules from the server
             function fetchIptablesRules() {
-                fetch('/iptables/list')
+                fetch('/iptables/list/accept')
                     .then(response => response.json())
                     .then(data => {
                         const output = data.output;

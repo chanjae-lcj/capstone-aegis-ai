@@ -4,10 +4,10 @@ import pam
 import os
 import json
 import psutil   # cpu 관련 라이브러리
-from firewall import is_valid_ip, is_valid_port, run_iptables_command, list_iptables_rules
+from firewall import is_valid_ip, is_valid_port, run_iptables_command, list_drop_rules, list_accept_rules
 from bgp import delete_bgp_protocol, add_bgp_protocol, enable_bgp_protocol,list_bgp_protocols,disable_bgp_protocol  # bgp.py 모듈을 import
 from static_routes import add_static_route, delete_static_route, list_routes  # static_routes 모듈을 import
-from nat import list_nat_rules, run_nat_command
+from nat import list_post_rules, list_pre_rules, run_nat_command
 from flask_socketio import SocketIO
 import threading
 import time
@@ -408,23 +408,31 @@ def os_info():
 # ------------------------------------------------------
 
 
-@app.route('/nat/list', methods=['GET'])
-def nat_list():
-    result = list_nat_rules()
+# @app.route('/nat/list', methods=['GET'])
+# def nat_list():
+#     result = list_nat_rules()
     
-    if result["error"]:
-        return jsonify({"error": result["error"]}), 500
+#     if result["error"]:
+#         return jsonify({"error": result["error"]}), 500
     
-    return jsonify({"output": result["output"]})
+#     return jsonify({"output": result["output"]})
 
 # -------------------- gh.w --------------------------   ip 차단 시작.
 
 
 # 차단된 IP, 포트 목록 가져오기
-@app.route('/iptables/list', methods=['GET'])
-def list_rules():
-    result = list_iptables_rules()
+@app.route('/iptables/list/drop', methods=['GET'])
+def drop_rules():
+    result = list_drop_rules()
+    if result["error"]:
+        return jsonify({"error": result["error"]}), 500
     
+    return jsonify({"output": result["output"]})
+
+# 허용된 IP, 포트 목록 가져오기
+@app.route('/iptables/list/accept', methods=['GET'])
+def accept_rules():
+    result = list_accept_rules()
     if result["error"]:
         return jsonify({"error": result["error"]}), 500
     
@@ -550,10 +558,18 @@ def allow_ip():
 
 
 #--------------------------------------------------- NAT 시작.
-# NAT 규칙 조회 API
-@app.route('/nat/rules', methods=['GET'])
-def get_nat_rules():
-    result = list_nat_rules()
+# NAT pre 규칙 조회 API
+@app.route('/nat/pre/rules', methods=['GET'])
+def get_nat_pre_rules():
+    result = list_pre_rules()
+    if result['error']:
+        return jsonify({"error": result['error']}), 500
+    return jsonify({"output": result['output']}), 200
+
+# NAT post 규칙 조회 API
+@app.route('/nat/post/rules', methods=['GET'])
+def get_nat_post_rules():
+    result = list_post_rules()
     if result['error']:
         return jsonify({"error": result['error']}), 500
     return jsonify({"output": result['output']}), 200
@@ -580,12 +596,10 @@ def add_postrouting():
     try:
         in_ip = request.form['inip']
         ex_ip = request.form['exip']
-        in_port = request.form['inport']
-        out_port = request.form['outport']
-        protocol = request.form['protocol']
+        inf = request.form['inf']
 
         # POSTROUTING 규칙 추가 명령어
-        cmd = f"sudo iptables -t nat -A POSTROUTING -s {in_ip} -p {protocol} --sport {in_port} -j SNAT --to-source {ex_ip}:{out_port}"
+        cmd = f"sudo iptables -t nat -A POSTROUTING -s {in_ip} -o {inf} -j SNAT --to-source {ex_ip}"
         subprocess.run(cmd, shell=True, check=True)
         
         return jsonify({'status': 'success', 'message': 'POSTROUTING 규칙이 추가되었습니다.'}), 200
@@ -640,6 +654,19 @@ def delete_prerouting():
             return jsonify({'success': False, 'message': f'오류: {result.stderr}'})
     except Exception as e:
         return jsonify({'success': False, 'message': f'서버 오류: {str(e)}'})
+
+# 플로팅 아이피 인터페이스 설정
+@app.route('/floting/interface/add', methods=['POST'])    
+def floting_interface():
+    try:
+        ip = request.form['ip']
+        interface = request.form['interface']
+        cmd = f"sudo ip addr add {ip} dev {interface}"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        return jsonify({'status': 'success', 'message': '플로팅 IP 인터페이스 추가되었습니다.'}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 #--------------------------------------------------- NAT 끝.
 
 
