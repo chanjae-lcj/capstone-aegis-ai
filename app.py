@@ -8,7 +8,7 @@ from firewall import is_valid_ip, is_valid_port, run_iptables_command, list_drop
 from bgp import delete_bgp_protocol, add_bgp_protocol, enable_bgp_protocol,list_bgp_protocols,disable_bgp_protocol  # bgp.py 모듈을 import
 from static_routes import add_static_route, delete_static_route, list_routes  # static_routes 모듈을 import
 from nat import list_post_rules, list_pre_rules, run_nat_command
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 import threading
 import time
 import subprocess
@@ -289,37 +289,37 @@ def routes_page():
 previous_data = psutil.net_io_counters(pernic=True)
 
 # 네트워크 그래프
-def get_network_traffic():
-    """실제 네트워크 사용량을 계산하여 반환"""
-    global previous_data
-    current_data = psutil.net_io_counters(pernic=True)
-    traffic_data = {}
+# def get_network_traffic():
+#     """실제 네트워크 사용량을 계산하여 반환"""
+#     global previous_data
+#     current_data = psutil.net_io_counters(pernic=True)
+#     traffic_data = {}
 
-    for interface, counters in current_data.items():
-        if interface in previous_data:
-            previous_counters = previous_data[interface]
-            traffic_data[interface] = {
-                'in': counters.bytes_recv - previous_counters.bytes_recv,  # 받은 데이터 양 (IN)
-                'out': counters.bytes_sent - previous_counters.bytes_sent   # 보낸 데이터 양 (OUT)
-            }
-        else:
-            traffic_data[interface] = {
-                'in': 0,
-                'out': 0
-            }
+#     for interface, counters in current_data.items():
+#         if interface in previous_data:
+#             previous_counters = previous_data[interface]
+#             traffic_data[interface] = {
+#                 'in': (counters.bytes_recv * 8) - (previous_counters.bytes_recv * 8),  # 받은 데이터 양 (IN)
+#                 'out': (counters.bytes_sent * 8) - (previous_counters.bytes_sent * 8)   # 보낸 데이터 양 (OUT)
+#             }
+#         else:
+#             traffic_data[interface] = {
+#                 'in': 0,
+#                 'out': 0
+#             }
 
-    previous_data = current_data
-    return traffic_data
+#     previous_data = current_data
+#     return traffic_data
 
 # 네트워크 테이블
 def get_network_traffic2():
-    """네트워크 사용량을 반환"""
+    """네트워크 사용량을 비트 단위로 반환"""
     traffic_data2 = {}
     counters = psutil.net_io_counters(pernic=True)
     for interface, data in counters.items():
         traffic_data2[interface] = {
-            'bytes_sent': data.bytes_sent,
-            'bytes_recv': data.bytes_recv,
+            'bits_sent': int(data.bytes_sent * 8 * 10**(-6)),   # 바이트를 비트로 변환, Mbit
+            'bits_recv': int(data.bytes_recv * 8 * 10**(-6)),   # 바이트를 비트로 변환, Mbit
             'packets_sent': data.packets_sent,
             'packets_recv': data.packets_recv,
             'errin': data.errin,
@@ -332,9 +332,9 @@ def get_network_traffic2():
 def background_thread():
     """네트워크 사용량을 실시간으로 보내는 백그라운드 스레드"""
     while True:
-        traffic_data = get_network_traffic()
+        # traffic_data = get_network_traffic()
         traffic_data2 = get_network_traffic2()
-        socketio.emit('network_data', traffic_data)
+        # socketio.emit('network_data', traffic_data)
         socketio.emit('network_data2', traffic_data2)
         time.sleep(1)
 
@@ -342,6 +342,22 @@ def background_thread():
 def connect():
     """클라이언트가 접속하면 백그라운드 스레드 시작"""
     threading.Thread(target=background_thread).start()
+
+# Emit real-time network data every second
+@socketio.on('request_network_data')
+def handle_network_data():
+    network_data = {}
+    net_io = psutil.net_io_counters(pernic=True)  # Get network stats for each interface
+
+    # Structure the data
+    for interface, stats in net_io.items():
+        network_data[interface] = {
+            'bits_recv': int(stats.bytes_recv * 8 * 10**(-6)),  # 들어오는 비트, 단위(Mbit)
+            'bits_sent': int(stats.bytes_sent * 8 * 10**(-6))  # 보내는 비트, 단위(Mbit)
+        }
+    
+    # Emit the network data to the client
+    emit('network_data', network_data)
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 끝
 
 
