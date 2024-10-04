@@ -8,15 +8,18 @@ from firewall import is_valid_ip, is_valid_port, run_iptables_command, list_drop
 from bgp import delete_bgp_protocol, add_bgp_protocol, enable_bgp_protocol,list_bgp_protocols,disable_bgp_protocol  # bgp.py 모듈을 import
 from static_routes import add_static_route, delete_static_route, list_routes  # static_routes 모듈을 import
 from nat import list_post_rules, list_pre_rules, run_nat_command
+from user import run_user_command, list_user, add_user, delete_user, pass_user, list2_user
+from collections import deque
+from threading import Thread, Lock
 from flask_socketio import SocketIO, emit
 import threading
 import time
 import subprocess
+from collections import deque
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션을 위한 비밀키 설정
 socketio = SocketIO(app)
-
 
 # PAM 객체 생성
 pam_auth = pam.pam()
@@ -285,63 +288,74 @@ def routes_page():
 # ------------------- gh.w -----------------------  static
 
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 시작
-# 이전 네트워크 상태 저장
-previous_data = psutil.net_io_counters(pernic=True)
 
-# 네트워크 그래프
-# def get_network_traffic():
-#     """실제 네트워크 사용량을 계산하여 반환"""
-#     global previous_data
-#     current_data = psutil.net_io_counters(pernic=True)
-#     traffic_data = {}
+# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
+traffic_data = deque(maxlen=1)
 
-#     for interface, counters in current_data.items():
-#         if interface in previous_data:
-#             previous_counters = previous_data[interface]
-#             traffic_data[interface] = {
-#                 'in': (counters.bytes_recv * 8) - (previous_counters.bytes_recv * 8),  # 받은 데이터 양 (IN)
-#                 'out': (counters.bytes_sent * 8) - (previous_counters.bytes_sent * 8)   # 보낸 데이터 양 (OUT)
-#             }
-#         else:
-#             traffic_data[interface] = {
-#                 'in': 0,
-#                 'out': 0
-#             }
+# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+previous_traffic = {
+    'bytes_sent': 0,
+    'bytes_recv': 0,
+    'packets_sent': 0,
+    'packets_recv': 0,
+    'errin': 0,
+    'errout': 0,
+    'dropin': 0,
+    'dropout': 0
+}
 
-#     previous_data = current_data
-#     return traffic_data
+# 쓰레드 안전성을 위한 락(lock)
+lock = Lock()
 
-# 네트워크 테이블
-def get_network_traffic2():
-    """네트워크 사용량을 비트 단위로 반환"""
-    traffic_data2 = {}
-    counters = psutil.net_io_counters(pernic=True)
-    for interface, data in counters.items():
-        traffic_data2[interface] = {
-            'bits_sent': int(data.bytes_sent * 8 * 10**(-6)),   # 바이트를 비트로 변환, Mbit
-            'bits_recv': int(data.bytes_recv * 8 * 10**(-6)),   # 바이트를 비트로 변환, Mbit
-            'packets_sent': data.packets_sent,
-            'packets_recv': data.packets_recv,
-            'errin': data.errin,
-            'errout': data.errout,
-            'dropin': data.dropin,
-            'dropout': data.dropout
-        }
-    return traffic_data2
+def add_network_traffic(new_data):
+    global previous_traffic
 
-def background_thread():
-    """네트워크 사용량을 실시간으로 보내는 백그라운드 스레드"""
+    current_traffic = {
+        'bytes_sent': new_data.bytes_sent - previous_traffic['bytes_sent'],
+        'bytes_recv': new_data.bytes_recv - previous_traffic['bytes_recv'],
+        'packets_sent': new_data.packets_sent - previous_traffic['packets_sent'],
+        'packets_recv': new_data.packets_recv - previous_traffic['packets_recv'],
+        'errin': new_data.errin - previous_traffic['errin'],
+        'errout': new_data.errout - previous_traffic['errout'],
+        'dropin': new_data.dropin - previous_traffic['dropin'],
+        'dropout': new_data.dropout - previous_traffic['dropout'],
+    }
+
+    # 현재 값을 저장해서 다음 10초 간격에 대비
+    previous_traffic = {
+        'bytes_sent': new_data.bytes_sent,
+        'bytes_recv': new_data.bytes_recv,
+        'packets_sent': new_data.packets_sent,
+        'packets_recv': new_data.packets_recv,
+        'errin': new_data.errin,
+        'errout': new_data.errout,
+        'dropin': new_data.dropin,
+        'dropout': new_data.dropout
+    }
+
+    # 데이터를 큐에 저장 (5분마다)
+    with lock:
+        traffic_data.append(current_traffic)
+
+    # 클라이언트로 실시간 데이터 전송
+    socketio.emit('traffic_data2', current_traffic)
+
+def network_traffic_generator():
+    # 이전 네트워크 트래픽 초기화
+    data = psutil.net_io_counters()
+    add_network_traffic(data)
+
+    # 실시간 네트워크 트래픽 데이터를 수집
     while True:
-        # traffic_data = get_network_traffic()
-        traffic_data2 = get_network_traffic2()
-        # socketio.emit('network_data', traffic_data)
-        socketio.emit('network_data2', traffic_data2)
-        time.sleep(1)
+        data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
+        add_network_traffic(data)  # 수집된 데이터를 처리
+        time.sleep(1)  # 10초마다 트래픽 데이터 추가
 
-@socketio.on('connect')
-def connect():
-    """클라이언트가 접속하면 백그라운드 스레드 시작"""
-    threading.Thread(target=background_thread).start()
+# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
+def start_network_traffic_thread():
+    thread = Thread(target=network_traffic_generator)
+    thread.daemon = True
+    thread.start()
 
 # Emit real-time network data every second
 @socketio.on('request_network_data')
@@ -358,6 +372,7 @@ def handle_network_data():
     
     # Emit the network data to the client
     emit('network_data', network_data)
+
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 끝
 
 
@@ -422,16 +437,6 @@ def os_info():
         return jsonify({'error': str(e)})
 
 # ------------------------------------------------------
-
-
-# @app.route('/nat/list', methods=['GET'])
-# def nat_list():
-#     result = list_nat_rules()
-    
-#     if result["error"]:
-#         return jsonify({"error": result["error"]}), 500
-    
-#     return jsonify({"output": result["output"]})
 
 # -------------------- gh.w --------------------------   ip 차단 시작.
 
@@ -685,6 +690,96 @@ def floting_interface():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 #--------------------------------------------------- NAT 끝.
 
+# --------------------------------------------------- 사용자 계정 시작.
+# Helper function to run commands
+def run_user_command2(command):
+    try:
+        result = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return {"output": result.stdout.decode('utf-8').strip()}
+    except subprocess.CalledProcessError as e:
+        return {"error": e.stderr.decode('utf-8').strip()}
+
+# 직접 추가한 사용자 계정 리스트 조회하기.
+@app.route('/user/list', methods=['GET'])
+def user_list_get():
+    result = list_user()
+    if result["error"]:
+        return jsonify({"error": result["error"]}), 500
+    
+    # 처리된 데이터를 output에 담아 보냅니다.
+    return jsonify({"output": result["output"]})
+
+# 디폴트 사용자 계정 리스트 조회하기.
+@app.route('/user/list2', methods=['GET'])
+def user_list2_get():
+    result = list2_user()
+    if result["error"]:
+        return jsonify({"error": result["error"]}), 500
+    
+    # 처리된 데이터를 output에 담아 보냅니다.
+    return jsonify({"output": result["output"]})
+
+# 사용자 계정 추가
+@app.route('/add_user', methods=['POST'])
+def add_user_get():
+    name = request.form['name']
+    manual = request.form['manual']
+    command = f"sudo useradd -m -c {manual} {name}"
+    result = run_user_command2(command)
+    
+    if "error" not in result:
+        result["output"] = f"'{name}' 계정이 정상적으로 추가되었습니다."
+    
+    return jsonify(result)
+
+# 사용자 계정 삭제
+@app.route('/delete_user', methods=['POST'])
+def delete_user():
+    name = request.form['name']
+    command = f"sudo userdel -r {name}"
+    result = run_user_command2(command)
+    
+    if "error" not in result:
+        result["output"] = f"'{name}' 계정이 정상적으로 삭제되었습니다."
+    
+    return jsonify(result)
+
+# 패스워드 설정
+@app.route('/set_password', methods=['POST'])
+def set_password():
+    name = request.form['name']
+    password = request.form['password']
+    command = f"echo '{name}:{password}' | sudo chpasswd"
+    result = run_user_command2(command)
+    
+    if "error" not in result:
+        result["output"] = f"'{name}' 계정의 패스워드가 설정되었습니다."
+    
+    return jsonify(result)
+
+# --------------------------------------------------- 사용자 계정 끝.
+
+def get_user_accounts():
+    try:
+        # 'getent passwd' 명령어를 실행하여 사용자 리스트를 가져옴
+        result = subprocess.run(['getent', 'passwd'], stdout=subprocess.PIPE, text=True)
+        users = []
+        
+        # 출력된 결과를 줄 단위로 나누고 각 줄에서 사용자 정보를 파싱
+        for line in result.stdout.splitlines():
+            user_info = line.split(':')
+            username = user_info[0]  # 첫 번째 필드는 사용자 이름
+            users.append(username)
+        
+        return users
+    except Exception as e:
+        return str(e)
+
+@app.route('/users', methods=['GET'])
+def list_users():
+    users = get_user_accounts()
+    return jsonify(users)
+
 
 
 # ------------------------------------------------------------------------------------------------------ 
@@ -692,6 +787,10 @@ def floting_interface():
 
 
 if __name__ == '__main__':
+    # 백그라운드에서 트래픽 데이터를 생성하는 쓰레드 실행
+    start_network_traffic_thread()
+    socketio.run(app)
+
     # config.py 파일에서 설정 불러오기
     app.config.from_pyfile("config.py")
 

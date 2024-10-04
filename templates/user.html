@@ -70,8 +70,7 @@
                 <div id="collapseIPController" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">IP Controller:</h6>
-                        <a class="collapse-item" href="/rule">IP 차단</a>
-                        <a class="collapse-item" href="/allow">IP 허용</a>
+                        <a class="collapse-item" href="/allow">IP 차단/허용 관리</a>
                     </div>
                 </div>
             </li>
@@ -311,6 +310,156 @@
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">사용자 계정 관리</h1>
 
+                    <!-- 버튼을 클릭하면 모달이 나타남 -->
+                    <!-- <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#">사용자</button> -->
+                    <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#userAdd">사용자 계정 추가</button>
+                    <button class="btn btn-success mb-3" data-toggle="modal" data-target="#passWd">비밀번호 설정</button>
+                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#userDelete">사용자 계정 삭제</button>
+
+                    <!-- 사용자 계정 추가 모달 -->
+    <div class="modal fade" id="userAdd" tabindex="-1" role="dialog" aria-labelledby="userAddLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userAddLabel">사용자 계정 추가</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="form-group">
+                            <label for="add_name">유저 이름</label>
+                            <input type="text" class="form-control" id="add_name" placeholder="예: tester" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_manual">설명</label>
+                            <input type="text" class="form-control" id="add_manual" placeholder="예: 테스터용" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addUser()">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 비밀번호 설정 모달 -->
+    <div class="modal fade" id="passWd" tabindex="-1" role="dialog" aria-labelledby="passWdLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passWdLabel">비밀번호 설정</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="passUserForm">
+                        <div class="form-group">
+                            <label for="pass_name">유저 이름</label>
+                            <input type="text" class="form-control" id="pass_name" placeholder="예: tester" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pass_wd">패스워드</label>
+                            <input type="text" class="form-control" id="pass_wd" placeholder="예: 1q2w3e4r!" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="setPassword()">설정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 사용자 계정 삭제 모달 -->
+    <div class="modal fade" id="userDelete" tabindex="-1" role="dialog" aria-labelledby="userDeleteLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userDeleteLabel">사용자 계정 삭제</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="deleteUserForm">
+                        <div class="form-group">
+                            <label for="rm_name">유저 이름</label>
+                            <input type="text" class="form-control" id="rm_name" placeholder="예: tester" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="deleteUser()">삭제</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+                    <br>
+                    <!-- 사용자 계정 테이블 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">사용자 계정 리스트</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>사용자명</th>
+                                            <th>UID</th>
+                                            <th>GID</th>
+                                            <th>설명 (주석)</th>
+                                            <th>홈 디렉토리 (절대경로)</th>
+                                            <th>쉘</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-list">
+                                    <!-- 사용자 계정 정보 업데이트 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <br>
+                    <!-- 사용자2 계정 테이블 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">전체 계정 리스트</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>사용자명</th>
+                                            <th>UID</th>
+                                            <th>GID</th>
+                                            <th>설명 (주석)</th>
+                                            <th>홈 디렉토리 (절대경로)</th>
+                                            <th>쉘</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-list2">
+                                    <!-- 사용자 계정 정보 업데이트 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
 
                 </div>
                 <!-- !!! 메인 컨텐츠 부분 !!! -->
@@ -349,6 +498,143 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+    <!-- 유저 리스트 조회 -->
+    <script>
+        async function fetchUserList() {
+            try {
+                const response = await fetch('/user/list');
+                const data = await response.json();
+        
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+        
+                const users = data.output.split('\n').filter(user => user.trim() !== ''); // 빈 줄 제거
+                const userList = document.getElementById('user-list');
+                userList.innerHTML = ''; // 기존 내용 초기화
+        
+                if (users.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="7" class="text-center">No users available</td>`;
+                    userList.appendChild(row);
+                    return;
+                }
+        
+                users.forEach(user => {
+                    const columns = user.split(' '); // 콜론(:)을 기준으로 나눕니다.
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${columns[0] || ""}</td> <!-- 사용자명 -->
+                            <td>${columns[1] || ""}</td> <!-- UID -->
+                            <td>${columns[2] || ""}</td> <!-- GID -->
+                            <td>${columns[3] || ""}</td> <!-- 설명 -->
+                            <td>${columns[4] || ""}</td> <!-- 홈 디렉토리 -->
+                            <td>${columns[5] || ""}</td> <!-- 쉘 -->
+                        `;
+                        userList.appendChild(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching user list:', error);
+            }
+        }
+    
+        // 페이지가 로드될 때 유저 리스트를 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchUserList);
+    </script>
+
+
+    <!-- 유저 리스트 조회 2-->
+    <script>
+        async function fetchUserList2() {
+            try {
+                const response = await fetch('/user/list2');
+                const data = await response.json();
+        
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+        
+                const users = data.output.split('\n').filter(user => user.trim() !== ''); // 빈 줄 제거
+                const userList = document.getElementById('user-list2');
+                userList.innerHTML = ''; // 기존 내용 초기화
+        
+                if (users.length === 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="7" class="text-center">No users available</td>`;
+                    userList.appendChild(row);
+                    return;
+                }
+        
+                users.forEach(user => {
+                    const columns = user.split(':'); // 콜론(:)을 기준으로 나눕니다.
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${columns[0] || ""}</td> <!-- 사용자명 -->
+                            <td>${columns[2] || ""}</td> <!-- UID -->
+                            <td>${columns[3] || ""}</td> <!-- GID -->
+                            <td>${columns[4] || ""}</td> <!-- 설명 -->
+                            <td>${columns[5] || ""}</td> <!-- 홈 디렉토리 -->
+                            <td>${columns[6] || ""}</td> <!-- 쉘 -->
+                        `;
+                        userList.appendChild(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching user list:', error);
+            }
+        }
+    
+        // 페이지가 로드될 때 유저 리스트를 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchUserList2);
+    </script>
+
+
+<script>
+    function addUser() {
+        const name = document.getElementById("add_name").value;
+        const manual = document.getElementById("add_manual").value;
+        $.post('/add_user', {name: name, manual: manual}, function(response) {
+            alert(response.output || response.error);
+            if (response.output) {
+                fetchUserList(); // 성공적으로 추가 후 리스트를 새로고침
+                fetchUserList2(); // 성공적으로 삭제 후 리스트를 새로고침
+            }
+            $('#userAdd').modal('hide');
+        });
+    }
+
+    function deleteUser() {
+        const name = document.getElementById("rm_name").value;
+        $.post('/delete_user', {name: name}, function(response) {
+            alert(response.output || response.error);
+            if (response.output) {
+                fetchUserList(); // 성공적으로 삭제 후 리스트를 새로고침
+                fetchUserList2(); // 성공적으로 삭제 후 리스트를 새로고침
+            }
+            $('#userDelete').modal('hide');
+        });
+    }
+
+    function setPassword() {
+        const name = document.getElementById("pass_name").value;
+        const password = document.getElementById("pass_wd").value;
+        $.post('/set_password', {name: name, password: password}, function(response) {
+            alert(response.output || response.error);
+            if (response.output) {
+                fetchUserList(); // 성공적으로 비밀번호 설정 후 리스트를 새로고침
+                fetchUserList2(); // 성공적으로 삭제 후 리스트를 새로고침
+            }
+            $('#passWd').modal('hide');
+        });
+    }
+</script>
+    
 
 </body>
 

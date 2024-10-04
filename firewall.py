@@ -22,7 +22,7 @@ def run_iptables_command(command):
 # 차단된 규칙 목록 (INPUT 체인만, 포트와 IP 표시) 가져오기 함수
 def list_drop_rules():
     # INPUT 체인에서 IP와 포트 정보를 포함한 상세 규칙을 가져오는 명령어
-    command = "sudo iptables -L INPUT -v -n --line-numbers | grep DROP"
+    command = "sudo iptables -L INPUT -v -n --line-numbers"
     # command = "sudo iptables -L INPUT -v -n --line-numbers"
     # 위 커맨드로 조회시 DROP 삭제 기능이 정상 작동 된다.
     return run_iptables_command(command)
@@ -30,5 +30,5 @@ def list_drop_rules():
 # 허용된 규칙 목록 (INPUT 체인만, 포트와 IP 표시) 가져오기 함수
 def list_accept_rules():
     # INPUT 체인에서 IP와 포트 정보를 포함한 상세 규칙을 가져오는 명령어
-    command = "sudo iptables -L INPUT -v -n --line-numbers | grep ACCEPT"
+    command = "sudo iptables -L INPUT -v -n --line-numbers"
     return run_iptables_command(command)

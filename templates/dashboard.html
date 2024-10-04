@@ -84,8 +84,7 @@
                 <div id="collapseIPController" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">IP Controller:</h6>
-                        <a class="collapse-item" href="/rule">IP 차단</a>
-                        <a class="collapse-item" href="/allow">IP 허용</a>
+                        <a class="collapse-item" href="/allow">IP 차단/허용 관리</a>
                     </div>
                 </div>
             </li>
@@ -518,8 +517,8 @@
                                                 <thead>
                                                     <tr>
                                                         <th>인터페이스</th>
-                                                        <th>보낸 비트</th>
-                                                        <th>받은 비트</th>
+                                                        <th>보낸 바이트</th>
+                                                        <th>받은 바이트</th>
                                                         <th>보낸 패킷</th>
                                                         <th>받은 패킷</th>
                                                         <th>수신 에러</th>
@@ -687,10 +686,10 @@
                         // CPU 사용량 업데이트
                         document.getElementById('cpu').textContent = data.cpu + '%';
 
-                        if (cpuChart.data.labels.length > 10) { // 데이터가 10개를 넘으면 가장 오래된 것 제거
+                        if (cpuChart.data.labels.length > 10) { // 보여주는 것은 10개만, 10개 이후는 삭제
                             cpuChart.data.labels.shift();
                             cpuChart.data.datasets[0].data.shift();
-                        }
+                        }               
 
                         cpuChart.update();
                     }
@@ -701,142 +700,6 @@
         });
     </script>
 
-    <!-- 네트워크 그래프 배경색 없는 버전 -->
-    <!-- <script>
-        const socket = io();
-    
-        // Predefined colors similar to the example
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56'];
-    
-        // IN 트래픽 그래프
-        const inTrafficCtx = document.getElementById('inTrafficChart').getContext('2d');
-        const inTrafficChart = new Chart(inTrafficCtx, {
-            type: 'line',
-            data: {
-                labels: [],  // 시간(초) 데이터
-                datasets: []  // 각 인터페이스의 데이터셋
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        type: 'linear',
-                        position: 'bottom'
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-    
-        // OUT 트래픽 그래프
-        const outTrafficCtx = document.getElementById('outTrafficChart').getContext('2d');
-        const outTrafficChart = new Chart(outTrafficCtx, {
-            type: 'line',
-            data: {
-                labels: [],  // 시간(초) 데이터
-                datasets: []  // 각 인터페이스의 데이터셋
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        type: 'linear',
-                        position: 'bottom'
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-    
-        let time = 0;  // 시간을 기록하기 위한 변수
-    
-        // 서버로부터 실시간 데이터 수신
-        socket.on('network_data', function (data) {
-            const interfaces = Object.keys(data);
-    
-            // IN 트래픽 데이터셋 업데이트
-            interfaces.forEach((interface, index) => {
-                const inData = data[interface].bits_recv;  // 받은 트래픽 데이터
-                const outData = data[interface].bits_sent; // 보낸 트래픽 데이터
-    
-                // IN 트래픽 그래프 데이터셋 추가
-                if (!inTrafficChart.data.datasets[index]) {
-                    inTrafficChart.data.datasets.push({
-                        // label: `Dataset ${index + 1} IN`,
-                        label: `${interface} IN`,
-                        data: [],
-                        borderColor: colors[index % colors.length],
-                        fill: false
-                    });
-                }
-    
-                // OUT 트래픽 그래프 데이터셋 추가
-                if (!outTrafficChart.data.datasets[index]) {
-                    outTrafficChart.data.datasets.push({
-                        // label: `Dataset ${index + 1} OUT`,
-                        label: `${interface} OUT`,
-                        data: [],
-                        borderColor: colors[index % colors.length],
-                        fill: false
-                    });
-                }
-    
-                // IN 트래픽 데이터 추가
-                inTrafficChart.data.datasets[index].data.push({x: time, y: inData});
-                // OUT 트래픽 데이터 추가
-                outTrafficChart.data.datasets[index].data.push({x: time, y: outData});
-    
-                // 일정 시간 이상 지나면 오래된 데이터 삭제 (예: 60초 데이터만 유지)
-                if (inTrafficChart.data.datasets[index].data.length > 15) {
-                    inTrafficChart.data.datasets[index].data.shift();
-                }
-                if (outTrafficChart.data.datasets[index].data.length > 15) {
-                    outTrafficChart.data.datasets[index].data.shift();
-                }
-            });
-    
-            // X축 레이블(시간) 업데이트
-            inTrafficChart.data.labels.push(time);
-            outTrafficChart.data.labels.push(time);
-    
-            if (inTrafficChart.data.labels.length > 15) {
-                inTrafficChart.data.labels.shift();
-            }
-            if (outTrafficChart.data.labels.length > 15) {
-                outTrafficChart.data.labels.shift();
-            }
-    
-            // 그래프 업데이트
-            inTrafficChart.update();
-            outTrafficChart.update();
-    
-            // 시간 증가
-            time++;
-        });
-    
-        // 1초마다 데이터 요청
-        setInterval(function () {
-            socket.emit('request_network_data');
-        }, 1000);
-    </script> -->
 
     <!-- 네트워크 그래프 배경색 있는 버전 -->
     <script>
@@ -950,10 +813,10 @@
                 outTrafficChart.data.datasets[index].data.push({x: time, y: outData});
     
                 // 일정 시간 이상 지나면 오래된 데이터 삭제 (예: 15초 데이터만 유지)
-                if (inTrafficChart.data.datasets[index].data.length > 15) {
+                if (inTrafficChart.data.datasets[index].data.length > 16) {
                     inTrafficChart.data.datasets[index].data.shift();
                 }
-                if (outTrafficChart.data.datasets[index].data.length > 15) {
+                if (outTrafficChart.data.datasets[index].data.length > 16) {
                     outTrafficChart.data.datasets[index].data.shift();
                 }
             });
@@ -982,34 +845,38 @@
             socket.emit('request_network_data');
         }, 1000);
     </script>
+                       
     
     
     
     
-    <!-- 네트워크 테이블 -->
     <script>
-        var socket2 = io();
+        const socket2 = io();
 
-        socket2.on('network_data2', function(data) {
-            var tableBody = document.getElementById('traffic_data2');
-            tableBody.innerHTML = '';  // 기존 데이터를 비웁니다.
+        socket.on('traffic_data2', function(data) {
+            const tableBody = document.getElementById('traffic_data2');
+            tableBody.innerHTML = ''; // 테이블 초기화 (최대 길이 1의 큐로 데이터 덮어씌움)
 
-            for (var interface in data) {
-                var row = '<tr>' +
-                    '<td>' + interface + '</td>' +
-                    '<td>' + data[interface].bits_sent + ' Mbit' + '</td>' +
-                    '<td>' + data[interface].bits_recv + ' Mbit' + '</td>' +
-                    '<td>' + data[interface].packets_sent + '</td>' +
-                    '<td>' + data[interface].packets_recv + '</td>' +
-                    '<td>' + data[interface].errin + '</td>' +
-                    '<td>' + data[interface].errout + '</td>' +
-                    '<td>' + data[interface].dropin + '</td>' +
-                    '<td>' + data[interface].dropout + '</td>' +
-                    '</tr>';
-                tableBody.innerHTML += row;
-            }
+            // 새로운 데이터 행 생성
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>enp0s3</td>
+                <td>${data.bytes_sent} byte</td>
+                <td>${data.bytes_recv} byte</td>
+                <td>${data.packets_sent} packet</td>
+                <td>${data.packets_recv} packet</td>
+                <td>${data.errin}</td>
+                <td>${data.errout}</td>
+                <td>${data.dropin}</td>
+                <td>${data.dropout}</td>
+            `;
+
+            // 새로운 데이터 행을 테이블에 추가
+            tableBody.appendChild(newRow);
         });
     </script>
+    
+
 
 </body>
 

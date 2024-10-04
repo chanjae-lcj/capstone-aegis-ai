@@ -70,8 +70,7 @@
                 <div id="collapseIPController" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">IP Controller:</h6>
-                        <a class="collapse-item" href="/rule">IP 차단</a>
-                        <a class="collapse-item" href="/allow">IP 허용</a>
+                        <a class="collapse-item" href="/allow">IP 차단/허용 관리</a>
                     </div>
                 </div>
             </li>
@@ -309,18 +308,20 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-4 text-gray-800">IP 허용 관리</h1>
+                    <h1 class="h3 mb-4 text-gray-800">IP 차단 및 허용 관리</h1>
 
-                    <button class="btn btn-primary" data-toggle="modal" data-target="#blockIpModal">허용할 IP 추가</button>
-                        <br> <br>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#blockIpModal">차단할 IP 추가</button>
+                    <button class="btn btn-success" data-toggle="modal" data-target="#allowIpModal">허용할 IP 추가</button>
+                        <br> <br>  
                     <!-- Modal for IP blocking -->
+
 
                     <!-- Modal for IP and Port blocking -->
                     <div class="modal fade" id="blockIpModal" tabindex="-1" role="dialog" aria-labelledby="blockIpModalLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="blockIpModalLabel">IP/포트 허용하기</h5>
+                                    <h5 class="modal-title" id="blockIpModalLabel">IP/포트 차단하기</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -346,7 +347,44 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                                    <button type="button" class="btn btn-primary" id="blockIpButton" data-dismiss="modal">추가</button>
+                                    <button type="button" class="btn btn-primary" id="blockIpButton" data-dismiss="modal">차단</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for IP and Port blocking -->
+                    <div class="modal fade" id="allowIpModal" tabindex="-1" role="dialog" aria-labelledby="allowIpModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="allowIpModalLabel">IP/포트 허용하기</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="allowIpForm">
+                                        <div class="form-group">
+                                            <label for="ipAddress2">IP 주소</label>
+                                            <input type="text" class="form-control" id="ipAddress2" placeholder="Enter IP address">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="portNumber2">포트 번호 (선택)</label>
+                                            <input type="text" class="form-control" id="portNumber2" placeholder="Enter port number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="protocol2">프로토콜 (선택)</label>
+                                            <select class="form-control" id="protocol2">
+                                                <option value="tcp">TCP</option>
+                                                <option value="udp">UDP</option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                    <button type="button" class="btn btn-success" id="allowIpButton" data-dismiss="modal">허용</button>
                                 </div>
                             </div>
                         </div>
@@ -354,7 +392,7 @@
 
                     <div class="card">
                         <div class="card-header">
-                          <h4 class="card-title">방화벽 접근 규칙 (허용)</h4>
+                          <h4 class="card-title">방화벽 접근 규칙</h4>
                         </div>
                         <div class="card-body">
                           <div class="table-responsive">
@@ -497,13 +535,10 @@
             // 페이지 로드 시 규칙 불러오기
             fetchIptablesRules();
             
-
-
-
-                document.getElementById('blockIpButton').addEventListener('click', function() {
-                const ipAddress = document.getElementById('ipAddress').value;
-                const portNumber = document.getElementById('portNumber').value;
-                const protocol = document.getElementById('protocol').value;
+                document.getElementById('allowIpButton').addEventListener('click', function() {
+                const ipAddress = document.getElementById('ipAddress2').value;
+                const portNumber = document.getElementById('portNumber2').value;
+                const protocol = document.getElementById('protocol2').value;
 
                 const data = {
                     ipAddress: ipAddress,
@@ -531,6 +566,45 @@
                     console.error('Error:', error);
                 });
                 });
+
+                // **IP/Port 차단 폼 처리**
+                document.getElementById('blockIpButton').addEventListener('click', function () {
+                const ip = document.getElementById('ipAddress').value;
+                const port = document.getElementById('portNumber').value;
+                const protocol = document.getElementById('protocol').value;
+        
+                let endpoint = '';
+                let data = { ip: ip };
+        
+                if (ip && port) {
+                    endpoint = '/iptables/block_ip_port';  // IP와 포트 둘 다 있으면 이 엔드포인트
+                    data.port = port;
+                    data.protocol = protocol;
+                } else if (ip) {
+                    endpoint = '/iptables/block_ip';  // IP만 있을 경우
+                } else {
+                    alert('IP 주소를 입력하세요');
+                    return;
+                }
+        
+                // 차단 요청 보내기
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('차단 성공');
+                            fetchIptablesRules(); // IP/Port 차단 후 규칙 다시 불러오기
+                        } else {
+                            alert('차단 실패');
+                        }
+                    })
+                    .catch(error => console.error('Error blocking IP/Port:', error));
+                 });
         });
     </script>
 
