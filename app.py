@@ -759,27 +759,6 @@ def set_password():
 
 # --------------------------------------------------- 사용자 계정 끝.
 
-def get_user_accounts():
-    try:
-        # 'getent passwd' 명령어를 실행하여 사용자 리스트를 가져옴
-        result = subprocess.run(['getent', 'passwd'], stdout=subprocess.PIPE, text=True)
-        users = []
-        
-        # 출력된 결과를 줄 단위로 나누고 각 줄에서 사용자 정보를 파싱
-        for line in result.stdout.splitlines():
-            user_info = line.split(':')
-            username = user_info[0]  # 첫 번째 필드는 사용자 이름
-            users.append(username)
-        
-        return users
-    except Exception as e:
-        return str(e)
-
-@app.route('/users', methods=['GET'])
-def list_users():
-    users = get_user_accounts()
-    return jsonify(users)
-
 
 
 # ------------------------------------------------------------------------------------------------------ 
@@ -789,7 +768,6 @@ def list_users():
 if __name__ == '__main__':
     # 백그라운드에서 트래픽 데이터를 생성하는 쓰레드 실행
     start_network_traffic_thread()
-    socketio.run(app)
 
     # config.py 파일에서 설정 불러오기
     app.config.from_pyfile("config.py")
@@ -800,3 +778,6 @@ if __name__ == '__main__':
 
     # Flask 애플리케이션 실행
     app.run('0.0.0.0', port=6001, debug=True)
+
+    # 백그라운드에서 트래픽 데이터를 생성하는 쓰레드 실행
+    socketio.run(app) # 순서 중요.
