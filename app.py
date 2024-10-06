@@ -358,22 +358,75 @@ def start_network_traffic_thread():
     thread.start()
 
 # Emit real-time network data every second
-@socketio.on('request_network_data')
-def handle_network_data():
-    network_data = {}
-    net_io = psutil.net_io_counters(pernic=True)  # Get network stats for each interface
+# @socketio.on('request_network_data')
+# def handle_network_data():
+#     network_data = {}
+#     net_io = psutil.net_io_counters(pernic=True)  # Get network stats for each interface
 
-    # Structure the data
-    for interface, stats in net_io.items():
-        network_data[interface] = {
-            'bits_recv': int(stats.bytes_recv * 8 * 10**(-6)),  # 들어오는 비트, 단위(Mbit)
-            'bits_sent': int(stats.bytes_sent * 8 * 10**(-6))  # 보내는 비트, 단위(Mbit)
-        }
+#     # Structure the data
+#     for interface, stats in net_io.items():
+#         network_data[interface] = {
+#             'bits_recv': int(stats.bytes_recv * 8 * 10**(-6)),  # 들어오는 비트, 단위(Mbit)
+#             'bits_sent': int(stats.bytes_sent * 8 * 10**(-6))  # 보내는 비트, 단위(Mbit)
+#         }
     
-    # Emit the network data to the client
-    emit('network_data', network_data)
+#     # Emit the network data to the client
+#     emit('network_data', network_data)
 
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 끝
+
+
+# ---------------- 네트워크 그래프 -------------------- 네트워크 그래프 시작.
+# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
+traffic_graph = deque(maxlen=11)
+
+# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+previous_graph = {
+    'bytes_sent': 0,
+    'bytes_recv': 0,
+}
+
+# 쓰레드 안전성을 위한 락(lock)
+lock2 = Lock()
+
+def add_network_graph(new_data):
+    global previous_graph
+
+    current_graph = {
+        'bytes_sent': new_data.bytes_sent - previous_graph['bytes_sent'],
+        'bytes_recv': new_data.bytes_recv - previous_graph['bytes_recv']
+    }
+
+    # 현재 값을 저장해서 다음 10초 간격에 대비
+    previous_graph = {
+        'bytes_sent': new_data.bytes_sent,
+        'bytes_recv': new_data.bytes_recv
+    }
+
+    # 데이터를 큐에 저장 (5분마다)
+    with lock:
+        traffic_data.append(current_graph)
+
+    # 클라이언트로 실시간 데이터 전송
+    socketio.emit('traffic_graph', current_graph)
+
+def network_traffic_generator2():
+    # 이전 네트워크 트래픽 초기화
+    data = psutil.net_io_counters()
+    add_network_graph(data)
+
+    # 실시간 네트워크 트래픽 데이터를 수집
+    while True:
+        data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
+        add_network_graph(data)  # 수집된 데이터를 처리
+        time.sleep(1)  # 300초마다 트래픽 데이터 추가
+
+# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
+def start_network_traffic_thread2():
+    thread = Thread(target=network_traffic_generator2)
+    thread.daemon = True
+    thread.start()
+# ---------------- 네트워크 그래프 -------------------- 네트워크 그래프 끝.
 
 
 
@@ -768,6 +821,7 @@ def set_password():
 if __name__ == '__main__':
     # 백그라운드에서 트래픽 데이터를 생성하는 쓰레드 실행
     start_network_traffic_thread()
+    start_network_traffic_thread2()
 
     # config.py 파일에서 설정 불러오기
     app.config.from_pyfile("config.py")
