@@ -25,6 +25,14 @@ socketio = SocketIO(app)
 pam_auth = pam.pam()
 
 
+# IP 허용 
+@app.route('/nettest')
+def nettest():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    username = session['username']
+    return render_template("nettest.html", username=username)
+
 # ---------------------컨트롤러--------------------- 컨트롤러 시작
 
 # 루트 접속시
@@ -376,9 +384,9 @@ def start_network_traffic_thread():
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 끝
 
 
-# ---------------- 네트워크 그래프 -------------------- 네트워크 그래프 시작.
-# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
-traffic_graph = deque(maxlen=11)
+# ---------------- 네트워크 그래프 1. -------------------- 첫 번째 네트워크 그래프 시작.
+# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 11
+traffic_graph = deque(maxlen=1)
 
 # 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
 previous_graph = {
@@ -397,7 +405,6 @@ def add_network_graph(new_data):
         'bytes_recv': new_data.bytes_recv - previous_graph['bytes_recv']
     }
 
-    # 현재 값을 저장해서 다음 10초 간격에 대비
     previous_graph = {
         'bytes_sent': new_data.bytes_sent,
         'bytes_recv': new_data.bytes_recv
@@ -426,7 +433,67 @@ def start_network_traffic_thread2():
     thread = Thread(target=network_traffic_generator2)
     thread.daemon = True
     thread.start()
-# ---------------- 네트워크 그래프 -------------------- 네트워크 그래프 끝.
+# ---------------- 네트워크 그래프 1. -------------------- 첫 번째 네트워크 그래프 끝.
+
+
+# ---------------- 네트워크 그래프 2. -------------------- 두 번째 네트워크 그래프 시작.
+# 11개의 데이터를 저장하는 FIFO 큐, 최대 길이 11
+traffic_graph5 = deque(maxlen=11)
+
+# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+previous_graph5 = {
+    'bytes_sent': 0,
+    'bytes_recv': 0,
+}
+
+# 쓰레드 안전성을 위한 락(lock)
+lock5 = Lock()
+
+def add_network_graph5(new_data):
+    global previous_graph5
+
+    current_graph5 = {
+        'bytes_sent': new_data.bytes_sent - previous_graph5['bytes_sent'],
+        'bytes_recv': new_data.bytes_recv - previous_graph5['bytes_recv']
+    }
+
+    previous_graph5 = {
+        'bytes_sent': new_data.bytes_sent,
+        'bytes_recv': new_data.bytes_recv
+    }
+
+    # 데이터를 큐에 저장 (5분마다)
+    with lock2:
+        traffic_graph5.append(current_graph5)
+
+    # 실시간 데이터 전송
+    socketio.emit('traffic_graph5', current_graph5)
+
+# 클라이언트 연결 시 기존의 11개 데이터를 전송하는 이벤트 처리
+@socketio.on('connect')
+def handle_connect5():
+    # 클라이언트가 연결될 때 지난 11개의 데이터를 전송
+    with lock5:
+        socketio.emit('initial_traffic_data', list(traffic_graph5))  # 자료구조 전체 데이터를 전송
+
+def network_traffic_generator5():
+    # 이전 네트워크 트래픽 초기화
+    data = psutil.net_io_counters()
+    add_network_graph5(data)
+
+    # 실시간 네트워크 트래픽 데이터를 수집
+    while True:
+        data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
+        add_network_graph5(data)  # 수집된 데이터를 처리
+        time.sleep(300)  # 300초마다 트래픽 데이터 추가
+
+# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
+def start_network_traffic_thread5():
+    thread = Thread(target=network_traffic_generator5)
+    thread.daemon = True
+    thread.start()
+
+# ---------------- 네트워크 그래프 2. -------------------- 두 번째 네트워크 그래프 끝.
 
 
 
@@ -822,6 +889,7 @@ if __name__ == '__main__':
     # 백그라운드에서 트래픽 데이터를 생성하는 쓰레드 실행
     start_network_traffic_thread()
     start_network_traffic_thread2()
+    start_network_traffic_thread5()
 
     # config.py 파일에서 설정 불러오기
     app.config.from_pyfile("config.py")

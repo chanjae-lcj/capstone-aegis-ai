@@ -224,7 +224,7 @@
                     </button>
 
                     <!-- Topbar Search -->
-                    <form
+                    <!-- <form
                         class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
                         <div class="input-group">
                             <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
@@ -235,7 +235,7 @@
                                 </button>
                             </div>
                         </div>
-                    </form>
+                    </form> -->
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
@@ -317,90 +317,90 @@
                     <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#userDelete">사용자 계정 삭제</button>
 
                     <!-- 사용자 계정 추가 모달 -->
-    <div class="modal fade" id="userAdd" tabindex="-1" role="dialog" aria-labelledby="userAddLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userAddLabel">사용자 계정 추가</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="addUserForm">
-                        <div class="form-group">
-                            <label for="add_name">유저 이름</label>
-                            <input type="text" class="form-control" id="add_name" placeholder="예: tester" required>
+                    <div class="modal fade" id="userAdd" tabindex="-1" role="dialog" aria-labelledby="userAddLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="userAddLabel">사용자 계정 추가</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="addUserForm">
+                                        <div class="form-group">
+                                            <label for="add_name">유저 이름</label>
+                                            <input type="text" class="form-control" id="add_name" placeholder="예: tester" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="add_manual">설명</label>
+                                            <input type="text" class="form-control" id="add_manual" placeholder="예: 테스터용" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" onclick="addUser()">추가</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="add_manual">설명</label>
-                            <input type="text" class="form-control" id="add_manual" placeholder="예: 테스터용" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addUser()">추가</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </div>
 
-    <!-- 비밀번호 설정 모달 -->
-    <div class="modal fade" id="passWd" tabindex="-1" role="dialog" aria-labelledby="passWdLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="passWdLabel">비밀번호 설정</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="passUserForm">
-                        <div class="form-group">
-                            <label for="pass_name">유저 이름</label>
-                            <input type="text" class="form-control" id="pass_name" placeholder="예: tester" required>
+                    <!-- 비밀번호 설정 모달 -->
+                    <div class="modal fade" id="passWd" tabindex="-1" role="dialog" aria-labelledby="passWdLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="passWdLabel">비밀번호 설정</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="passUserForm">
+                                        <div class="form-group">
+                                            <label for="pass_name">유저 이름</label>
+                                            <input type="text" class="form-control" id="pass_name" placeholder="예: tester" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="pass_wd">패스워드</label>
+                                            <input type="text" class="form-control" id="pass_wd" placeholder="예: 1q2w3e4r!" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-success" onclick="setPassword()">설정</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="pass_wd">패스워드</label>
-                            <input type="text" class="form-control" id="pass_wd" placeholder="예: 1q2w3e4r!" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-success" onclick="setPassword()">설정</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </div>
 
-    <!-- 사용자 계정 삭제 모달 -->
-    <div class="modal fade" id="userDelete" tabindex="-1" role="dialog" aria-labelledby="userDeleteLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userDeleteLabel">사용자 계정 삭제</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="deleteUserForm">
-                        <div class="form-group">
-                            <label for="rm_name">유저 이름</label>
-                            <input type="text" class="form-control" id="rm_name" placeholder="예: tester" required>
+                    <!-- 사용자 계정 삭제 모달 -->
+                    <div class="modal fade" id="userDelete" tabindex="-1" role="dialog" aria-labelledby="userDeleteLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="userDeleteLabel">사용자 계정 삭제</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="deleteUserForm">
+                                        <div class="form-group">
+                                            <label for="rm_name">유저 이름</label>
+                                            <input type="text" class="form-control" id="rm_name" placeholder="예: tester" required>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" onclick="deleteUser()">삭제</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                </div>
+                            </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" onclick="deleteUser()">삭제</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                </div>
-            </div>
-        </div>
-    </div>
+                    </div>
 
 
 
@@ -416,8 +416,8 @@
                                     <thead>
                                         <tr>
                                             <th>사용자명</th>
-                                            <th>UID</th>
-                                            <th>GID</th>
+                                            <!-- <th>UID</th>
+                                            <th>GID</th> -->
                                             <th>설명 (주석)</th>
                                             <th>홈 디렉토리 (절대경로)</th>
                                             <th>쉘</th>
@@ -435,7 +435,7 @@
 
                     <br>
                     <!-- 사용자2 계정 테이블 -->
-                    <div class="card">
+                    <!-- <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">전체 계정 리스트</h4>
                         </div>
@@ -453,12 +453,11 @@
                                         </tr>
                                     </thead>
                                     <tbody id="user-list2">
-                                    <!-- 사용자 계정 정보 업데이트 -->
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
 
                 </div>
@@ -528,8 +527,6 @@
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${columns[0] || ""}</td> <!-- 사용자명 -->
-                            <td>${columns[1] || ""}</td> <!-- UID -->
-                            <td>${columns[2] || ""}</td> <!-- GID -->
                             <td>${columns[3] || ""}</td> <!-- 설명 -->
                             <td>${columns[4] || ""}</td> <!-- 홈 디렉토리 -->
                             <td>${columns[5] || ""}</td> <!-- 쉘 -->

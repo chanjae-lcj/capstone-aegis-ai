@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Traffic Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h2>Network Traffic Graph (5-minute intervals)</h2>
+    <canvas id="networkChart" width="400" height="200"></canvas>
+
+    
+
+    <script>
+        var ctx = document.getElementById('networkChart').getContext('2d');
+
+        // x축은 5분 간격의 시간, y축은 트래픽 데이터 (bytes)
+        var trafficChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],  // 5분 간격의 시간을 담을 배열
+                datasets: [{
+                    label: 'Bytes Sent',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: true,
+                    data: [],  // y축 데이터 - 전송 바이트
+                }, {
+                    label: 'Bytes Received',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    fill: true,
+                    data: [],  // y축 데이터 - 수신 바이트
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',  // 시간 타입으로 x축 표시
+                        time: {
+                            unit: 'minute',  // 5분 간격 표시
+                            tooltipFormat: 'HH:mm',  // 툴팁 시간 포맷
+                            displayFormats: {
+                                minute: 'HH:mm'  // x축의 시간 표시 포맷
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time (5 minute intervals)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Bytes'
+                        },
+                        beginAtZero: true  // y축이 0부터 시작
+                    }
+                }
+            }
+        });
+
+        // Socket.IO 클라이언트 초기화
+        var socket = io();
+
+        // 서버로부터 실시간 데이터를 받으면 그래프를 업데이트
+        socket.on('traffic_graph', function (data) {
+            var currentTime = new Date();  // 현재 시간
+
+            // 그래프 데이터 업데이트
+            trafficChart.data.labels.push(currentTime);
+            trafficChart.data.datasets[0].data.push(data.bytes_sent);  // Bytes Sent 추가
+            trafficChart.data.datasets[1].data.push(data.bytes_recv);  // Bytes Received 추가
+
+            // 데이터가 11개를 초과하면 첫 번째 데이터를 제거 (FIFO)
+            if (trafficChart.data.labels.length > 11) {
+                trafficChart.data.labels.shift();
+                trafficChart.data.datasets[0].data.shift();
+                trafficChart.data.datasets[1].data.shift();
+            }
+
+            // 그래프 업데이트
+            trafficChart.update();
+        });
+    </script>
+</body>
+</html>
