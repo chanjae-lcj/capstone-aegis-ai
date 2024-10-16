@@ -154,8 +154,8 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">VPN:</h6>
                         <a class="collapse-item" href="/openvpn">Open VPN</a>
-                        <a class="collapse-item" href="/pptp">PPTP</a>
-                        <a class="collapse-item" href="/l2tp">L2TP</a>
+                        <!-- <a class="collapse-item" href="/pptp">PPTP</a>
+                        <a class="collapse-item" href="/l2tp">L2TP</a> -->
                     </div>
                 </div>
             </li>
@@ -272,7 +272,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">Hallym</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">{{ username }}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{{url_for('static',filename='img/undraw_profile.svg')}}">
                             </a>
@@ -346,7 +346,7 @@
 
                     <!-- 버튼 -->
                     <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blockIpModal">플로팅 아이피 연결</button>
-                    <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">플로팅 아이피 해제</button>
+                    <!-- <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">플로팅 아이피 해제</button> -->
 
                     <!-- POSTROUTING 추가 모달 -->
                     <div class="modal fade" id="blockIpModal" tabindex="-1" role="dialog" aria-labelledby="blockIpModalLabel" aria-hidden="true">
@@ -492,7 +492,7 @@
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
     <!-- NAT 리스트 조회 -->
-    <script>
+    <!-- <script>
         async function fetchPortForwardingRules() {
             try {
                 const response = await fetch('/nat/post/rules');
@@ -541,6 +541,89 @@
             } catch (error) {
                 console.error('Error fetching NAT rules:', error);
             }
+        }
+    
+        // 페이지가 로드될 때 규칙을 가져옵니다.
+        document.addEventListener('DOMContentLoaded', fetchPortForwardingRules);
+    </script> -->
+
+    <!-- NAT 리스트 조회 및 삭제 기능 -->
+    <script>
+        async function fetchPortForwardingRules() {
+            try {
+                const response = await fetch('/nat/post/rules');
+                const data = await response.json();
+    
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+    
+                const rules = data.output.split('\n').slice();
+                const portList = document.getElementById('port-list');
+                portList.innerHTML = '';
+    
+                if (rules.length === 0 || rules[0].trim() === "") {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="14" class="text-center">No NAT rules available</td>`;
+                    portList.appendChild(row);
+                    return;
+                }
+    
+                rules.forEach((rule, index) => {
+                    const columns = rule.split(/\s+/);
+                    if (columns.length > 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${columns[0] || ""}</td> 
+                            <td>${columns[1] || ""}</td> 
+                            <td>${columns[2] || ""}</td> 
+                            <td>${columns[3] || ""}</td> 
+                            <td>${columns[4] || ""}</td> 
+                            <td>${columns[5] || ""}</td> 
+                            <td>${columns[6] || ""}</td> 
+                            <td>${columns[7] || ""}</td> 
+                            <td>${columns[8] || ""}</td> 
+                            <td>${columns[9] || ""}</td> 
+                            <td>${columns[10] || ""}</td> 
+                            <td>${columns[11] || ""}</td> 
+                            <td>${columns[13] || ""}</td> 
+                            <td>${
+                                index >= 3 && index < rules.length - 1 ? 
+                                `<button class="btn btn-danger" onclick="deleteRule(${index - 1})">삭제</button>` : 
+                                ""
+                            }</td>
+                        `;
+                        portList.appendChild(row);
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching NAT rules:', error);
+            }
+        }
+    
+        // POSTROUTING 규칙 삭제 요청
+        function deleteRule(num) {
+            fetch('/delete_postrouting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ num: num })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // 성공 시 추가 동작
+                    fetchPortForwardingRules();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
     
         // 페이지가 로드될 때 규칙을 가져옵니다.
@@ -645,6 +728,17 @@
             });
         });
     </script>
+
+
+<!-- 세션 유저 이름 -->
+<script>
+    // JavaScript to set the username in the span
+    document.addEventListener('DOMContentLoaded', function() {
+        const username = "{{ username }}";
+        document.getElementById('session_name').textContent = username;
+    });
+</script>
+
 
 
 </body>

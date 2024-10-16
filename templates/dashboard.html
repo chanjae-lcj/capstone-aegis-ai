@@ -168,8 +168,8 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">VPN:</h6>
                         <a class="collapse-item" href="/openvpn">Open VPN</a>
-                        <a class="collapse-item" href="/pptp">PPTP</a>
-                        <a class="collapse-item" href="/l2tp">L2TP</a>
+                        <!-- <a class="collapse-item" href="/pptp">PPTP</a>
+                        <a class="collapse-item" href="/l2tp">L2TP</a> -->
                     </div>
                 </div>
             </li>
@@ -286,7 +286,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">Hallym</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">{{ username }}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{{url_for('static',filename='img/undraw_profile.svg')}}">
                             </a>
@@ -340,7 +340,7 @@
                                             <h6 class="font-weight-bold text-gray-800">사용자 이름</h6>
                                         </div>
                                         <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="user_name">Loading...</span>
+                                            <span>{{ username }}</span>
                                         </div>
                                     </div>
 
@@ -684,7 +684,7 @@
                         document.getElementById('error').textContent = data.error;
                     } else {
                         // 데이터를 각각의 HTML 요소에 표시
-                        document.getElementById('user_name').textContent = data.user_name;
+                        // document.getElementById('user_name').textContent = data.user_name;
                         document.getElementById('sys_info').textContent = JSON.stringify(data.sys_info, null, 2);
                         document.getElementById('cpu_count').textContent = data.cpu_count + "개";
                         document.getElementById('ip_address').textContent = data.ip_address;
@@ -761,151 +761,15 @@
         });
     </script>
 
+    <!-- 세션 유저 이름 -->
+    <script>
+        // JavaScript to set the username in the span
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = "{{ username }}";
+            document.getElementById('session_name').textContent = username;
+        });
+    </script>
 
-    <!-- 네트워크 그래프 배경색 있는 버전 -->
-    <!-- <script>
-        const socket = io();
-    
-        // Predefined colors for the lines
-        const colors = ['#FF6384', '#36A2EB', '#FFCE56'];
-    
-        // Function to convert hex color to rgba for background with transparency
-        function hexToRgba(hex, opacity) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-        }
-    
-        // IN 트래픽 그래프
-        const inTrafficCtx = document.getElementById('inTrafficChart').getContext('2d');
-        const inTrafficChart = new Chart(inTrafficCtx, {
-            type: 'line',
-            data: {
-                labels: [],  // 시간(초) 데이터
-                datasets: []  // 각 인터페이스의 데이터셋
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        type: 'linear',
-                        position: 'bottom'
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-    
-        // OUT 트래픽 그래프
-        const outTrafficCtx = document.getElementById('outTrafficChart').getContext('2d');
-        const outTrafficChart = new Chart(outTrafficCtx, {
-            type: 'line',
-            data: {
-                labels: [],  // 시간(초) 데이터
-                datasets: []  // 각 인터페이스의 데이터셋
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    },
-                    x: {
-                        type: 'linear',
-                        position: 'bottom'
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            usePointStyle: true
-                        }
-                    }
-                }
-            }
-        });
-    
-        let time = 0;  // 시간을 기록하기 위한 변수
-    
-        // 서버로부터 실시간 데이터 수신
-        socket.on('network_data', function (data) {
-            const interfaces = Object.keys(data);
-    
-            // IN 트래픽 데이터셋 업데이트
-            interfaces.forEach((interface, index) => {
-                const inData = data[interface].bits_recv;  // 받은 트래픽 데이터
-                const outData = data[interface].bits_sent; // 보낸 트래픽 데이터
-    
-                // IN 트래픽 그래프 데이터셋 추가
-                if (!inTrafficChart.data.datasets[index]) {
-                    inTrafficChart.data.datasets.push({
-                        label: `${interface} IN`,
-                        data: [],
-                        borderColor: colors[index % colors.length],
-                        backgroundColor: hexToRgba(colors[index % colors.length], 0.05),  // 배경색 추가
-                        fill: true
-                    });
-                }
-    
-                // OUT 트래픽 그래프 데이터셋 추가
-                if (!outTrafficChart.data.datasets[index]) {
-                    outTrafficChart.data.datasets.push({
-                        label: `${interface} OUT`,
-                        data: [],
-                        borderColor: colors[index % colors.length],
-                        backgroundColor: hexToRgba(colors[index % colors.length], 0.05),  // 배경색 추가
-                        fill: true
-                    });
-                }
-    
-                // IN 트래픽 데이터 추가
-                inTrafficChart.data.datasets[index].data.push({x: time, y: inData});
-                // OUT 트래픽 데이터 추가
-                outTrafficChart.data.datasets[index].data.push({x: time, y: outData});
-    
-                // 일정 시간 이상 지나면 오래된 데이터 삭제 (예: 15초 데이터만 유지)
-                if (inTrafficChart.data.datasets[index].data.length > 16) {
-                    inTrafficChart.data.datasets[index].data.shift();
-                }
-                if (outTrafficChart.data.datasets[index].data.length > 16) {
-                    outTrafficChart.data.datasets[index].data.shift();
-                }
-            });
-    
-            // X축 레이블(시간) 업데이트
-            inTrafficChart.data.labels.push(time);
-            outTrafficChart.data.labels.push(time);
-    
-            if (inTrafficChart.data.labels.length > 15) {
-                inTrafficChart.data.labels.shift();
-            }
-            if (outTrafficChart.data.labels.length > 15) {
-                outTrafficChart.data.labels.shift();
-            }
-    
-            // 그래프 업데이트
-            inTrafficChart.update();
-            outTrafficChart.update();
-    
-            // 시간 증가
-            time++;
-        });
-    
-        // 1초마다 데이터 요청
-        setInterval(function () {
-            socket.emit('request_network_data');
-        }, 1000);
-    </script> -->
                        
       
     <!-- 네트워크 테이블 -->
@@ -1098,89 +962,6 @@
 </script>
 
 
-<!-- 네트워크 그래프 2 -->
-<!-- <script>
-    var ctx = document.getElementById('networkChart').getContext('2d');
-
-    // x축은 5분 간격의 시간, y축은 트래픽 데이터 (bytes)
-    var trafficChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],  // 5분 간격의 시간을 담을 배열
-            datasets: [{
-                label: 'Bytes Sent',
-                // borderColor: 'rgba(75, 192, 192, 1)',
-                // backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(60, 179, 113, 1)',
-                backgroundColor: 'rgba(60, 179, 113, 0.2)',
-                fill: true,
-                data: [],  // y축 데이터 - 전송 바이트
-            }, {
-                label: 'Bytes Received',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                // borderColor: 'rgba(255, 99, 132, 1)',
-                // backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                fill: true,
-                data: [],  // y축 데이터 - 수신 바이트
-            }]
-        },
-        options: {
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Time (5 minute intervals)'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Bytes'
-                    },
-                    beginAtZero: true  // y축이 0부터 시작
-                }
-            }
-        }
-    });
-
-    // Socket.IO 클라이언트 초기화
-    var socket5 = io();
-
-    // 서버에서 받은 초기 데이터를 처리
-    socket5.on('initial_traffic_data', function (data) {
-        // 그래프 초기화
-        data.forEach(function (item) {
-            var timeString = new Date().toLocaleTimeString();  // 간단한 시간 형식
-            trafficChart.data.labels.push(timeString);  // x축 레이블에 시간 추가
-            trafficChart.data.datasets[0].data.push(item.bytes_sent);  // Bytes Sent 추가
-            trafficChart.data.datasets[1].data.push(item.bytes_recv);  // Bytes Received 추가
-        });
-
-        // 그래프 업데이트
-        trafficChart.update();
-    });
-
-    // 실시간 데이터를 받아서 그래프를 업데이트
-    socket5.on('traffic_graph5', function (data) {
-        var timeString = new Date().toLocaleTimeString();  // 간단한 시간 형식
-
-        // 그래프 데이터 업데이트
-        trafficChart.data.labels.push(timeString);  // x축에 현재 시간 추가
-        trafficChart.data.datasets[0].data.push(data.bytes_sent);  // Bytes Sent 추가
-        trafficChart.data.datasets[1].data.push(data.bytes_recv);  // Bytes Received 추가
-
-        // 데이터가 11개를 초과하면 첫 번째 데이터를 제거 (FIFO)
-        if (trafficChart.data.labels.length > 11) {
-            trafficChart.data.labels.shift();
-            trafficChart.data.datasets[0].data.shift();
-            trafficChart.data.datasets[1].data.shift();
-        }
-
-        // 그래프 업데이트
-        trafficChart.update();
-    });
-</script> -->
 
 <script>
     var ctx = document.getElementById('networkChart').getContext('2d');

@@ -154,8 +154,8 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">VPN:</h6>
                         <a class="collapse-item" href="/openvpn">Open VPN</a>
-                        <a class="collapse-item" href="/pptp">PPTP</a>
-                        <a class="collapse-item" href="/l2tp">L2TP</a>
+                        <!-- <a class="collapse-item" href="/pptp">PPTP</a>
+                        <a class="collapse-item" href="/l2tp">L2TP</a> -->
                     </div>
                 </div>
             </li>
@@ -272,7 +272,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">Hallym</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-1000 small">{{ username }}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{{url_for('static',filename='img/undraw_profile.svg')}}">
                             </a>
@@ -308,7 +308,7 @@
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <h1 class="h3 mb-4 text-gray-800">오픈 VPN</h1>
+                    <h1 class="h3 mb-4 text-gray-800">Open VPN</h1>
 
 
                 </div>
@@ -349,6 +349,17 @@
     <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
+
+    <!-- 세션 유저 이름 -->
+    <script>
+        // JavaScript to set the username in the span
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = "{{ username }}";
+            document.getElementById('session_name').textContent = username;
+        });
+    </script>
+
+    
 </body>
 
 </html>

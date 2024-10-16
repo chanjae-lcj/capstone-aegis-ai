@@ -25,13 +25,7 @@ socketio = SocketIO(app)
 pam_auth = pam.pam()
 
 
-# IP 허용 
-@app.route('/nettest')
-def nettest():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    username = session['username']
-    return render_template("nettest.html", username=username)
+
 
 # ---------------------컨트롤러--------------------- 컨트롤러 시작
 
@@ -53,7 +47,7 @@ def login_check():
         session['username'] = username
         return jsonify(success=True)
     else:
-        return jsonify(success=False, message="Invalid credentials. Please try again.")
+        return jsonify(success=False, message="Failed. Please try again.")
 
 
 # 로그아웃 파트
@@ -184,7 +178,8 @@ def document():
 def bgp():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template("bgp.html")
+    username = session['username']
+    return render_template("bgp.html", username=username)
 
 # BGP 프로토콜 삭제
 @app.route('/bgp/delete/<protocol_name>', methods=['DELETE'])
@@ -291,7 +286,8 @@ def delete_route():
 def routes_page():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template("routes.html")
+    username = session['username']
+    return render_template("routes.html", username=username)
 
 # ------------------- gh.w -----------------------  static
 
@@ -845,6 +841,8 @@ def add_user_get():
     name = request.form['name']
     manual = request.form['manual']
     command = f"sudo useradd -m -c {manual} {name}"
+    # adduser를 사용하여 계정 추가
+    # command = f"sudo adduser {name} --gecos '{manual}' --disabled-password"
     result = run_user_command2(command)
     
     if "error" not in result:
