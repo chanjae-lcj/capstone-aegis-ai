@@ -328,8 +328,8 @@
                                 <div class="modal-body">
                                     <form id="aiForm">
                                         <div class="form-group">
-                                            <label for="ai">AI 차단 한계치</label>
-                                            <input type="text" class="form-control" id="ai" placeholder="Limit 값을 입력하세요.">
+                                            <label for="ai">AI 차단 한계치를 설정하세요.</label>
+                                            <input type="text" class="form-control" id="ai" placeholder="Limit값을 최소 170 이상으로 입력하세요.">
                                         </div>
                                     </form>
                                 </div>
@@ -566,8 +566,8 @@
             .catch(error => console.error('오류:', error));
     }
 
-    // 5초마다 상태 업데이트
-    setInterval(updateStatus, 3000);
+    // 1초마다 상태 업데이트
+    setInterval(updateStatus, 1000);
     updateStatus();  // 페이지 로드 시 즉시 업데이트
 </script>
 

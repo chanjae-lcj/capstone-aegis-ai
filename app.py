@@ -1016,6 +1016,14 @@ def update_ai_value():
     if not ai_value:
         return jsonify({"error": "값이 비어 있습니다."}), 400
 
+    # ai_value를 정수로 변환하고, 170보다 작은지 확인
+    try:
+        ai_value = int(ai_value)
+        if ai_value < 170:
+            return jsonify({"error": "값이 너무 작아 적용할 수 없습니다. 최소 값은 170입니다."}), 400
+    except ValueError:
+        return jsonify({"error": "유효한 숫자 값을 입력하세요."}), 400
+
     # Flask 애플리케이션의 루트 디렉토리 경로 가져오기
     app_root = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(app_root, 'aitest.py')
