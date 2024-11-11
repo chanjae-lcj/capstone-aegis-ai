@@ -92,7 +92,6 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">AI Controller:</h6>
                         <a class="collapse-item" href="/ai">자동 차단 규칙</a>
-                        <a class="collapse-item" href="/model">모델 설정</a>
                     </div>
                 </div>
             </li>
@@ -311,6 +310,31 @@
                     <h1 class="h3 mb-4 text-gray-800">인터페이스 관리</h1>
 
 
+                    <!-- 인터페이스 테이블 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">인터페이스 테이블</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>인터페이스</th>
+                                            <th>상태</th>
+                                            <th>IP 주소</th>
+                                            <th>기타 정보</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="interface-list">
+                                    <!-- 인터페이스 목록이 여기에 동적으로 추가됩니다 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </div>
                 <!-- !!! 메인 컨텐츠 부분 !!! -->
                 <!-- /.container-fluid -->
@@ -359,6 +383,79 @@
         });
     </script>
 
+
+
+<script>
+    // 서버에서 인터페이스 목록을 가져오는 함수
+    function fetchInterfaceList() {
+        $.get("/inf/list", function(data) {
+            if (data.error) {
+                alert("인터페이스 정보를 가져오는 데 실패했습니다.");
+            } else {
+                // 출력된 ifconfig 정보를 처리하여 테이블에 표시
+                const output = data.output;
+                const interfaces = parseInterfaces(output);
+
+                let rows = "";
+                interfaces.forEach(function(interface) {
+                    rows += `
+                        <tr>
+                            <td>${interface.name}</td>
+                            <td>${interface.status}</td>
+                            <td>${interface.ip}</td>
+                            <td>${interface.other}</td>
+                        </tr>
+                    `;
+                });
+
+                $("#interface-list").html(rows);
+            }
+        });
+    }
+
+    // ifconfig 명령어 출력에서 인터페이스 정보를 파싱하는 함수
+    function parseInterfaces(output) {
+        const interfaces = [];
+        const lines = output.split("\n");
+        let currentInterface = null;
+
+        lines.forEach(function(line) {
+            if (line.trim() === "") return;
+
+            // 인터페이스 이름 (예: eth0, wlan0)
+            const interfaceMatch = line.match(/^([a-zA-Z0-9]+):/);
+            if (interfaceMatch) {
+                if (currentInterface) {
+                    interfaces.push(currentInterface);
+                }
+                currentInterface = { name: interfaceMatch[1], status: "활성화", ip: "", other: "" };
+            }
+
+            // IP 주소 찾기
+            const ipMatch = line.match(/inet (\d+\.\d+\.\d+\.\d+)/);
+            if (ipMatch && currentInterface) {
+                currentInterface.ip = ipMatch[1];
+            }
+
+            // 기타 정보 추가 (예: 브로드캐스트 주소)
+            const otherMatch = line.match(/broadcast (\d+\.\d+\.\d+\.\d+)/);
+            if (otherMatch && currentInterface) {
+                currentInterface.other = otherMatch[1];
+            }
+        });
+
+        if (currentInterface) {
+            interfaces.push(currentInterface);
+        }
+
+        return interfaces;
+    }
+
+    // 페이지 로딩 후 인터페이스 정보 가져오기
+    $(document).ready(function() {
+        fetchInterfaceList();
+    });
+</script>
     
 </body>
 

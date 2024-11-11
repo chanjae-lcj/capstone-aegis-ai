@@ -92,7 +92,6 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">AI Controller:</h6>
                         <a class="collapse-item" href="/ai">자동 차단 규칙</a>
-                        <a class="collapse-item" href="/model">모델 설정</a>
                     </div>
                 </div>
             </li>
@@ -310,6 +309,83 @@
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">Open VPN</h1>
 
+                    <div class="row">
+
+                        <div class="col-xl-3 col-lg-5">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#vpnCreateModal">VPN Client File Create</button>
+                            <br> <br>
+                            <div class="col-lg-6 d-none d-lg-block bg-login-image">
+                                <img class="margin-top-10 margin-left-10" src = "{{url_for('static',filename='img/open.png')}}" width="270px" height="270px">
+                            </div>
+                        </div>
+
+                        <!-- Modal for IP and Port blocking -->
+                    <div class="modal fade" id="vpnCreateModal" tabindex="-1" role="dialog" aria-labelledby="vpnCreateModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="vpnCreateModalLabel">VPN 클라이언트 생성</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="vpnForm">
+                                        <div class="form-group">
+                                            <label for="name">client file name</label>
+                                            <input type="text" class="form-control" id="name" placeholder="Enter the client file name.">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                    <button type="button" class="btn btn-primary" id="vpnCreateButton" data-dismiss="modal">생성</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+
+                        <div class="col-xl-9 col-lg-5">
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">Current OpenVPN Clients</h4>
+                                </div>
+                                <div class="card-body">
+                                    <!-- 로딩 스피너 -->
+                                    <div id="loading-spinner" class="spinner-border text-primary" width="80" height="80" role="status">
+                                        <span class="visually-hidden" width="80" height="80"></span>
+                                    </div>
+                                    
+                                    <div id="vpn-table-container" class="table-responsive" style="display: none;">
+                                        <table class='table table-striped'>
+                                            <thead>
+                                            <tr>
+                                                <th>Num</th>
+                                                <th>Client</th>
+                                                <th>Download</th>
+                                                <th>Delete</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody id="vpn-table">
+                                            <!-- 테이블 행이 동적으로 추가됩니다 -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+
+
+
+        
+
+                    <br> <br>
 
                 </div>
                 <!-- !!! 메인 컨텐츠 부분 !!! -->
@@ -359,6 +435,173 @@
         });
     </script>
 
+
+
+<!-- <script>
+    // VPN 파일 목록 가져오기
+    async function fetchVpnFiles() {
+        try {
+            const response = await fetch('/api/vpn-files');
+            const files = await response.json();
+            const tableBody = document.getElementById('vpn-table');
+            
+            // 테이블 초기화
+            tableBody.innerHTML = '';
+
+            // 파일 목록 테이블에 추가
+            files.forEach(file => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${file.num}</td>
+                    <td>${file.client}</td>
+                    <td><button class="btn btn-success btn-sm" onclick="downloadFile('${file.client}')">Download</button></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteFile('${file.client}')">Delete</button></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching VPN files:', error);
+        }
+    }
+
+    // 페이지 로드 시 VPN 파일 목록 가져오기
+    window.onload = fetchVpnFiles;
+
+    // 파일 삭제 함수
+    async function deleteFile(fileName) {
+        if (confirm('파일을 삭제하시겠습니까?')) {
+            try {
+                const response = await fetch(`/api/delete-file/${fileName}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('파일이 삭제되었습니다.');
+                    fetchVpnFiles();  // 테이블 다시 로드
+                } else {
+                    alert('Failed to delete file.');
+                }
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+        }
+    }
+
+    // 파일 다운로드 함수
+    function downloadFile(fileName) {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/api/download-file/${fileName}`;
+        downloadLink.click();
+    }
+</script> -->
+
+
+<script>
+    // VPN 파일 목록 가져오기
+    async function fetchVpnFiles() {
+        const spinner = document.getElementById('loading-spinner');
+        const tableContainer = document.getElementById('vpn-table-container');
+        const tableBody = document.getElementById('vpn-table');
+        
+        // 스피너 표시, 테이블 숨기기
+        spinner.style.display = 'block';
+        tableContainer.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/vpn-files');
+            const files = await response.json();
+            
+            // 테이블 초기화
+            tableBody.innerHTML = '';
+
+            // 파일 목록 테이블에 추가
+            files.forEach(file => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${file.num}</td>
+                    <td>${file.client}</td>
+                    <td><button class="btn btn-success btn-sm" onclick="downloadFile('${file.client}')">Download</button></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteFile('${file.client}')">Delete</button></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching VPN files:', error);
+        } finally {
+            // 스피너 숨기고 테이블 표시
+            spinner.style.display = 'none';
+            tableContainer.style.display = 'block';
+        }
+    }
+
+    // 페이지 로드 시 VPN 파일 목록 가져오기
+    window.onload = fetchVpnFiles;
+
+    // 파일 삭제 함수
+    async function deleteFile(fileName) {
+        if (confirm('파일을 삭제하시겠습니까?')) {
+            try {
+                const response = await fetch(`/api/delete-file/${fileName}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('파일이 삭제되었습니다.');
+                    fetchVpnFiles();  // 테이블 다시 로드
+                } else {
+                    alert('Failed to delete file.');
+                }
+            } catch (error) {
+                console.error('Error deleting file:', error);
+            }
+        }
+    }
+
+    // 파일 다운로드 함수
+    function downloadFile(fileName) {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/api/download-file/${fileName}`;
+        downloadLink.click();
+    }
+</script>
+
+
+    <!-- 클라이언트 파일 생성 옛날 버전-->
+    <!-- <script>
+    document.getElementById("vpnCreateButton").addEventListener("click", function () {
+        const clientName = document.getElementById("name").value;
+        fetch("/create-vpn", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name: clientName }),
+        })
+        .then(response => response.json())
+        .then(data => alert(data.message))
+        .catch(error => console.error("Error:", error));
+    });
+    </script> -->
+
+
+
+    <script>
+        // 클라이언트 파일 생성
+        document.getElementById("vpnCreateButton").addEventListener("click", function () {
+            const clientName = document.getElementById("name").value;
+            fetch("/create-vpn", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name: clientName }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchVpnFiles();  // 파일 생성 후 테이블 새로고침
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
     
 </body>
 

@@ -92,7 +92,6 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">AI Controller:</h6>
                         <a class="collapse-item" href="/ai">자동 차단 규칙</a>
-                        <a class="collapse-item" href="/model">모델 설정</a>
                     </div>
                 </div>
             </li>
@@ -310,6 +309,146 @@
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">AI 자동 차단 규칙</h1>
 
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#aiModal">AI 차단 한계치 설정</button>
+                    <!-- <button class="btn btn-success" data-toggle="modal" data-target="#startModal">AI 모델 실행</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#stopModal">AI 모델 끄기</button> -->
+
+                    <button class="btn btn-success" data-toggle="modal" data-target="#startModal" onclick="showSpinner()">AI 모델 실행</button>
+                    <button class="btn btn-danger" data-toggle="modal" data-target="#stopModal" onclick="hideSpinner()">AI 모델 끄기</button>
+
+                    <div class="modal fade" id="aiModal" tabindex="-1" role="dialog" aria-labelledby="aiModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="aiModalLabel">AI 차단 한계치</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="aiForm">
+                                        <div class="form-group">
+                                            <label for="ai">AI 차단 한계치</label>
+                                            <input type="text" class="form-control" id="ai" placeholder="Limit 값을 입력하세요.">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                                    <button type="button" class="btn btn-primary" id="aiButton" data-dismiss="modal">설정</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+
+                    <div class="row">
+
+                        <!-- Earnings (Annual) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Current Limit</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 current-limit">Loding...</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="currentColor" class="bi bi-alt text-info" viewBox="0 0 16 16">
+                                                <path d="M1 13.5a.5.5 0 0 0 .5.5h3.797a.5.5 0 0 0 .439-.26L11 3h3.5a.5.5 0 0 0 0-1h-3.797a.5.5 0 0 0-.439.26L5 13H1.5a.5.5 0 0 0-.5.5m10 0a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 0-1h-3a.5.5 0 0 0-.5.5"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Requests Card Example -->
+                        <!-- <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                AI model status</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800 ai-model-status">Loding...</div>
+                                        </div> -->
+                                        <!-- 스피너 코드 -->
+                                        <!-- <a class="spinner-border text-warning" role="status" id="spinner" style="display: none;">
+                                        </a>
+                                        <svg id="spinner" style="display: block;" xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="currentColor" class="bi bi-sign-stop" viewBox="0 0 16 16">
+                                            <path d="M3.16 10.08c-.931 0-1.447-.493-1.494-1.132h.653c.065.346.396.583.891.583.524 0 .83-.246.83-.62 0-.303-.203-.467-.637-.572l-.656-.164c-.61-.147-.978-.51-.978-1.078 0-.706.597-1.184 1.444-1.184.853 0 1.386.475 1.436 1.087h-.645c-.064-.32-.352-.542-.797-.542-.472 0-.77.246-.77.6 0 .261.196.437.553.522l.654.161c.673.164 1.06.487 1.06 1.11 0 .736-.574 1.228-1.544 1.228Zm3.427-3.51V10h-.665V6.57H4.753V6h3.006v.568H6.587Z"/>
+                                            <path fill-rule="evenodd" d="M11.045 7.73v.544c0 1.131-.636 1.805-1.661 1.805-1.026 0-1.664-.674-1.664-1.805V7.73c0-1.136.638-1.807 1.664-1.807s1.66.674 1.66 1.807Zm-.674.547v-.553c0-.827-.422-1.234-.987-1.234-.572 0-.99.407-.99 1.234v.553c0 .83.418 1.237.99 1.237.565 0 .987-.408.987-1.237m1.15-2.276h1.535c.82 0 1.316.55 1.316 1.292 0 .747-.501 1.289-1.321 1.289h-.865V10h-.665zm1.436 2.036c.463 0 .735-.272.735-.744s-.272-.741-.735-.741h-.774v1.485z"/>
+                                            <path fill-rule="evenodd" d="M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0zM1 5.1 5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+
+                        <!-- AI Model Status Card -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    AI model status</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800 ai-model-status">Loding...</div>
+                                </div>
+                                <!-- 스피너 이모티콘 -->
+                                <a class="spinner-border text-warning" width="45" height="45" role="status" id="spinner" style="display: none;"></a>
+                                <!-- SVG 아이콘 -->
+                                <svg id="svg-icon" style="display: block;" xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="currentColor" class="bi bi-sign-stop text-warning" viewBox="0 0 16 16">
+                                    <path d="M3.16 10.08c-.931 0-1.447-.493-1.494-1.132h.653c.065.346.396.583.891.583.524 0 .83-.246.83-.62 0-.303-.203-.467-.637-.572l-.656-.164c-.61-.147-.978-.51-.978-1.078 0-.706.597-1.184 1.444-1.184.853 0 1.386.475 1.436 1.087h-.645c-.064-.32-.352-.542-.797-.542-.472 0-.77.246-.77.6 0 .261.196.437.553.522l.654.161c.673.164 1.06.487 1.06 1.11 0 .736-.574 1.228-1.544 1.228Zm3.427-3.51V10h-.665V6.57H4.753V6h3.006v.568H6.587Z"/>
+                                    <path fill-rule="evenodd" d="M11.045 7.73v.544c0 1.131-.636 1.805-1.661 1.805-1.026 0-1.664-.674-1.664-1.805V7.73c0-1.136.638-1.807 1.664-1.807s1.66.674 1.66 1.807Zm-.674.547v-.553c0-.827-.422-1.234-.987-1.234-.572 0-.99.407-.99 1.234v.553c0 .83.418 1.237.99 1.237.565 0 .987-.408.987-1.237m1.15-2.276h1.535c.82 0 1.316.55 1.316 1.292 0 .747-.501 1.289-1.321 1.289h-.865V10h-.665zm1.436 2.036c.463 0 .735-.272.735-.744s-.272-.741-.735-.741h-.774v1.485z"/>
+                                    <path fill-rule="evenodd" d="M4.893 0a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146A.5.5 0 0 0 11.107 0zM1 5.1 5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9z"/>
+                                </svg>
+                                </div>
+                            </div>
+                            </div>
+                        </div> 
+
+                    </div>
+
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">AI 자동 차단 규칙 테이블</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Num</th>
+                                            <th>Pkts</th>
+                                            <th>Bytes</th>
+                                            <th>Target</th>
+                                            <th>Prot</th>
+                                            <th>Opt</th>
+                                            <th>In</th>
+                                            <th>Out</th>
+                                            <th>Source</th>
+                                            <th>Destination</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ip-list">
+                                    <!-- ip list -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <br><br>
+
+
+
 
                 </div>
                 <!-- !!! 메인 컨텐츠 부분 !!! -->
@@ -358,6 +497,151 @@
             document.getElementById('session_name').textContent = username;
         });
     </script>
+
+
+<script>
+    document.getElementById('aiButton').addEventListener('click', function() {
+        const aiValue = document.getElementById('ai').value;
+
+        fetch('/update_ai_value', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ 'ai': aiValue })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('값이 성공적으로 업데이트되었습니다.');
+            } else {
+                alert(`오류: ${data.error}`);
+            }
+        })
+        .catch(error => alert(`서버 요청 중 오류가 발생했습니다: ${error}`));
+    });
+</script>
+
+<!-- ai 모델 실행 및 중지 -->
+<script>
+    document.querySelector('.btn-success').addEventListener('click', function() {
+        fetch('/start_ai', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.success);
+                } else {
+                    alert(`오류: ${data.error}`);
+                }
+            })
+            .catch(error => alert(`서버 요청 중 오류가 발생했습니다: ${error}`));
+    });
+
+    document.querySelector('.btn-danger').addEventListener('click', function() {
+        fetch('/stop_ai', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.success);
+                } else {
+                    alert(`오류: ${data.error}`);
+                }
+            })
+            .catch(error => alert(`서버 요청 중 오류가 발생했습니다: ${error}`));
+    });
+</script>
+
+<script>
+    // 실시간 상태 및 한계치 값 갱신 함수
+    function updateStatus() {
+        fetch('/get_ai_status')
+            .then(response => response.json())
+            .then(data => {
+                // 한계치 값을 업데이트
+                document.querySelector('.current-limit').textContent = data.limit;
+                
+                // AI 모델 상태를 업데이트
+                document.querySelector('.ai-model-status').textContent = data.status;
+            })
+            .catch(error => console.error('오류:', error));
+    }
+
+    // 5초마다 상태 업데이트
+    setInterval(updateStatus, 3000);
+    updateStatus();  // 페이지 로드 시 즉시 업데이트
+</script>
+
+<script>
+    function showSpinner() {
+      document.getElementById("spinner").style.display = "block";
+      document.getElementById("svg-icon").style.display = "none";
+    }
+  
+    function hideSpinner() {
+      document.getElementById("spinner").style.display = "none";
+      document.getElementById("svg-icon").style.display = "block";
+    }
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        // GET 요청으로 서버에서 규칙 목록을 가져오기
+        $.get('/get_ai_ip_rules', function(data) {
+            // 테이블에 데이터를 추가
+            const tbody = $('#ip-list');
+            if (data.error) {
+                alert("Error: " + data.error);
+            } else {
+                data.forEach(function(rule, index) {
+                    // 첫 번째 항목은 건너뛰기
+                    if (index === 0) return;
+                    const row = `
+                        <tr data-num="${rule.num}">
+                            <td>${rule.num}</td>
+                            <td>${rule.pkts}</td>
+                            <td>${rule.bytes}</td>
+                            <td>${rule.target}</td>
+                            <td>${rule.prot}</td>
+                            <td>${rule.opt}</td>
+                            <td>${rule.in}</td>
+                            <td>${rule.out}</td>
+                            <td>${rule.source}</td>
+                            <td>${rule.destination}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm delete-btn">삭제</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                // 삭제 버튼 클릭 이벤트 핸들러
+                $('.delete-btn').on('click', function() {
+                    const row = $(this).closest('tr');
+                    const ruleNum = row.data('num');
+                    deleteRule(ruleNum, row);
+                });
+            }
+        });
+        
+        // 규칙 삭제 함수
+        function deleteRule(ruleNum, row) {
+            $.ajax({
+                url: '/delete_ai_ip_rule/' + ruleNum,
+                type: 'DELETE',
+                success: function(response) {
+                    // 삭제 성공 후 테이블에서 해당 행 제거
+                    alert("규칙을 삭제하였습니다.");
+                    row.remove();
+                },
+                error: function(xhr, status, error) {
+                    alert("삭제 실패: " + error);
+                }
+            });
+        }
+    });
+</script>
 
 
 </body>

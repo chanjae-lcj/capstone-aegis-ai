@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session
-from sqlalchemy import create_engine
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_from_directory
+# from sqlalchemy import create_engine
 import pam
+import re
 import os
 import json
 import psutil   # cpu 관련 라이브러리
@@ -9,6 +10,8 @@ from bgp import delete_bgp_protocol, add_bgp_protocol, enable_bgp_protocol,list_
 from static_routes import add_static_route, delete_static_route, list_routes  # static_routes 모듈을 import
 from nat import list_post_rules, list_pre_rules, run_nat_command
 from user import run_user_command, list_user, add_user, delete_user, pass_user, list2_user
+from ai import list_ai_ip_rules
+from inf import list_inf
 from collections import deque
 from threading import Thread, Lock
 from flask_socketio import SocketIO, emit
@@ -16,6 +19,7 @@ import threading
 import time
 import subprocess
 from collections import deque
+import signal # ai에 사용
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션을 위한 비밀키 설정
@@ -291,6 +295,77 @@ def routes_page():
 
 # ------------------- gh.w -----------------------  static
 
+# ------------------- ai -------------------------  ai 패킷
+"""
+# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
+ai_traffic_data = deque(maxlen=25)
+
+# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+ai_previous_traffic = {
+    'bytes_sent': 0,
+    'bytes_recv': 0,
+    'packets_sent': 0,
+    'packets_recv': 0,
+    'errin': 0,
+    'errout': 0,
+    'dropin': 0,
+    'dropout': 0
+}
+
+# 쓰레드 안전성을 위한 락(lock)
+ai_lock = Lock()
+
+def ai_add_network_traffic(new_data):
+    global ai_previous_traffic
+
+    ai_current_traffic = {
+        'bytes_sent': new_data.bytes_sent - previous_traffic['bytes_sent'],
+        'bytes_recv': new_data.bytes_recv - previous_traffic['bytes_recv'],
+        'packets_sent': new_data.packets_sent - previous_traffic['packets_sent'],
+        'packets_recv': new_data.packets_recv - previous_traffic['packets_recv'],
+        'errin': new_data.errin - previous_traffic['errin'],
+        'errout': new_data.errout - previous_traffic['errout'],
+        'dropin': new_data.dropin - previous_traffic['dropin'],
+        'dropout': new_data.dropout - previous_traffic['dropout'],
+    }
+
+    # 현재 값을 저장해서 다음 10초 간격에 대비
+    ai_previous_traffic = {
+        'bytes_sent': new_data.bytes_sent,
+        'bytes_recv': new_data.bytes_recv,
+        'packets_sent': new_data.packets_sent,
+        'packets_recv': new_data.packets_recv,
+        'errin': new_data.errin,
+        'errout': new_data.errout,
+        'dropin': new_data.dropin,
+        'dropout': new_data.dropout
+    }
+
+    # 데이터를 큐에 저장 (5분마다)
+    with ai_lock:
+        ai_traffic_data.append(ai_current_traffic)
+
+    # 클라이언트로 실시간 데이터 전송
+    socketio.emit('ai_traffic_data', ai_current_traffic)
+
+def ai_network_traffic_generator():
+    # 이전 네트워크 트래픽 초기화
+    ai_data = psutil.net_io_counters()
+    ai_add_network_traffic(ai_data)
+
+    # 실시간 네트워크 트래픽 데이터를 수집
+    while True:
+        ai_data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
+        add_network_traffic(ai_data)  # 수집된 데이터를 처리
+        time.sleep(1)  # 10초마다 트래픽 데이터 추가
+
+# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
+def ai_start_network_traffic_thread():
+    thread = Thread(target=ai_network_traffic_generator)
+    thread.daemon = True
+    thread.start()
+# ----------------- ai ---------------------------- ai 패킷
+"""
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 시작
 
 # 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
@@ -877,7 +952,202 @@ def set_password():
 
 # --------------------------------------------------- 사용자 계정 끝.
 
+#--------------------------------------------------- vpn 시작.
+# VPN 디렉토리에 있는 파일 목록을 가져오는 함수
+def get_vpn_files():
+    vpn_dir = '/home/hallym/aegisai/vpn'  # vpn 디렉토리 경로를 입력하세요
+    files = os.listdir(vpn_dir)
+    return [{'num': idx + 1, 'client': file} for idx, file in enumerate(files)]
 
+@app.route('/api/vpn-files')
+def vpn_files():
+    files = get_vpn_files()
+    return jsonify(files)
+
+# VPN 파일 다운로드 API
+@app.route('/api/download-file/<filename>')
+def download_file(filename):
+    file_path = '/home/hallym/aegisai/vpn'
+    try:
+        return send_from_directory(file_path, filename, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({"error": "File not found"}), 404
+    
+# VPN 파일 삭제 API
+@app.route('/api/delete-file/<filename>', methods=['DELETE'])
+def delete_file(filename):
+    file_path = os.path.join('/home/hallym/aegisai/vpn', filename)
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            return jsonify({"message": "파일이 삭제되었습니다."}), 200
+        else:
+            return jsonify({"error": "File not found."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route("/create-vpn", methods=["POST"])
+def create_vpn():
+    data = request.get_json()
+    client_name = data.get("name")
+    
+    if not client_name or not client_name.isalnum():
+        return jsonify({"message": "클라이언트 이름이 잘못 입력되었습니다."}), 400
+    
+    try:
+        command = f"sudo ../auto-openvpn-install.sh 1 {client_name}"
+        subprocess.run(command, shell=True, check=True)
+        return jsonify({"message": f"VPN client '{client_name}' 생성되었습니다."})
+    except subprocess.CalledProcessError as e:
+        return jsonify({"message": f"Failed to create VPN client: {str(e)}"}), 500
+
+#--------------------------------------------------- vpn 끝.
+
+# -------------------------------------------------- ai 시작.
+
+# 프로세스 ID를 저장할 변수
+process = None
+
+# 한계치 값 수정
+@app.route('/update_ai_value', methods=['POST'])
+def update_ai_value():
+    ai_value = request.form.get('ai')
+    if not ai_value:
+        return jsonify({"error": "값이 비어 있습니다."}), 400
+
+    # Flask 애플리케이션의 루트 디렉토리 경로 가져오기
+    app_root = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(app_root, 'aitest.py')
+
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        # 10번째 라인을 새 값으로 변경
+        lines[9] = f"limit = {ai_value}\n"
+
+        with open(file_path, 'w') as file:
+            file.writelines(lines)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# 한계치 값을 읽어오는 함수
+def get_current_limit():
+    try:
+        # aitest.py 파일의 절대 경로 설정
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aitest.py')
+        with open(script_path, 'r') as file:
+            lines = file.readlines()
+            # 10번째 줄 값 가져오기
+            limit_value = lines[9].strip()
+            return limit_value
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+# API: AI 모델 상태 및 한계치 값 반환
+@app.route('/get_ai_status', methods=['GET'])
+def get_ai_status():
+    global process
+    ai_status = "Running" if process is not None else "Stopped"
+    current_limit = get_current_limit() + "%"  # 10번째 줄 값을 읽어옴
+    
+    return jsonify({
+        "limit": current_limit,
+        "status": ai_status
+    })
+    
+# API: aitest.py 실행
+@app.route('/start_ai', methods=['POST'])
+def start_ai():
+    global process
+    if process is not None:
+        return jsonify({"error": "AI 모델이 이미 실행 중입니다."}), 400
+
+    try:
+        # aitest.py 파일의 절대 경로 가져오기
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aitest.py')
+        process = subprocess.Popen(['python3', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        return jsonify({"success": "AI 모델이 성공적으로 실행되었습니다."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# API: 실행 중인 aitest.py 중지
+@app.route('/stop_ai', methods=['POST'])
+def stop_ai():
+    global process
+    if process is None:
+        return jsonify({"error": "AI 모델이 실행 중이 아닙니다."}), 400
+
+    try:
+        # 프로세스 종료
+        os.kill(process.pid, signal.SIGTERM)
+        process = None
+        return jsonify({"success": "AI 모델이 성공적으로 중지되었습니다."})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@app.route('/get_ai_ip_rules', methods=['GET'])
+def get_ai_ip_rules():
+    # iptables 명령어로 규칙 목록 가져오기
+    result = list_ai_ip_rules()
+    
+    # 에러가 있을 경우 처리
+    if result['error']:
+        return jsonify({"error": result['error']}), 400
+    
+    # 규칙 목록을 파싱하여 반환
+    ip_rules = parse_ai_ip_rules(result['output'])
+    return jsonify(ip_rules)
+
+def parse_ai_ip_rules(output):
+    # iptables 규칙 목록을 파싱하여 리스트 형태로 변환
+    rules = []
+    for line in output.splitlines():
+        # 데이터를 각 항목별로 분리
+        parts = re.split(r'\s+', line)
+        if len(parts) >= 10:
+            rules.append({
+                'num': parts[0],
+                'pkts': parts[1],
+                'bytes': parts[2],
+                'target': parts[3],
+                'prot': parts[4],
+                'opt': parts[5],
+                'in': parts[6],
+                'out': parts[7],
+                'source': parts[8],
+                'destination': parts[9]
+            })
+    return rules
+
+@app.route('/delete_ai_ip_rule/<int:rule_num>', methods=['DELETE'])
+def delete_ai_ip_rule(rule_num):
+    # iptables 명령어로 특정 규칙 삭제
+    command = f"sudo iptables -D AI {rule_num}"
+    result = run_iptables_command(command)
+    
+    if result['error']:
+        return jsonify({"error": result['error']}), 400
+    
+    return jsonify({"message": "규칙 삭제 성공"}), 200
+# -------------------------------------------------- ai 끝.
+
+#--------------------------------------------------- 인터페이스 시작.
+
+# 인터페이스 조회 API
+@app.route('/inf/list', methods=['GET'])
+def get_inf_list_get():
+    result = list_inf()
+    if result['error']:
+        return jsonify({"error": result['error']}), 500
+    return jsonify({"output": result['output']}), 200
+
+#--------------------------------------------------- 인터페이스 끝.
 
 # ------------------------------------------------------------------------------------------------------ 
 
@@ -888,13 +1158,14 @@ if __name__ == '__main__':
     start_network_traffic_thread()
     start_network_traffic_thread2()
     start_network_traffic_thread5()
+    # ai_start_network_traffic_thread()
 
     # config.py 파일에서 설정 불러오기
-    app.config.from_pyfile("config.py")
+    # app.config.from_pyfile("config.py")
 
     # 데이터베이스 엔진 생성
-    database = create_engine(app.config['DB_URL'], max_overflow=0)
-    app.database = database
+    # database = create_engine(app.config['DB_URL'], max_overflow=0)
+    # app.database = database
 
     # Flask 애플리케이션 실행
     app.run('0.0.0.0', port=6001, debug=True)

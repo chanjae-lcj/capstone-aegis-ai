@@ -1,0 +1,15 @@
+model:
+  input_size: 1
+  d_model: 256
+  nhead: 8
+  num_layers: 4
+  output_size: 1
+  n_steps: 25
+
+training:
+  checkpoint_path: "/home/hallym/aegisai/nn/checkpoint_model_1.pth.tar"
+  log_file_path: "/home/hallym/aegisai/nn//log4.txt"
+
+evaluation:
+  thresholds: [2, 3, 5, 10, 20, 30, 40, 50]
+  batch_size: 1
