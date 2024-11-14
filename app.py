@@ -461,8 +461,8 @@ traffic_graph = deque(maxlen=1)
 
 # 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
 previous_graph = {
-    'bytes_sent': 0,
-    'bytes_recv': 0,
+    'bytes_sent': psutil.net_io_counters().bytes_sent,
+    'bytes_recv': psutil.net_io_counters().bytes_recv,
 }
 
 # 쓰레드 안전성을 위한 락(lock)
@@ -513,8 +513,8 @@ traffic_graph5 = deque(maxlen=11)
 
 # 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
 previous_graph5 = {
-    'bytes_sent': 0,
-    'bytes_recv': 0,
+    'bytes_sent': psutil.net_io_counters().bytes_sent,
+    'bytes_recv': psutil.net_io_counters().bytes_recv,
 }
 
 # 쓰레드 안전성을 위한 락(lock)
