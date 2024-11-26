@@ -334,7 +334,7 @@
                                 <div class="card-body">
 
                                     <!-- 1 Row -->
-                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                    <div class="row align-items-center py-2 border-bottom border-top bg-light">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">사용자 이름</h6>
                                         </div>
@@ -353,16 +353,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- 3 Row -->
-                                    <div class="row align-items-center py-2 border-bottom bg-light">
-                                        <div class="col-md-4">
-                                            <h6 class="font-weight-bold text-gray-800">CPU 개수</h6>
-                                        </div>
-                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="cpu_count">Loading...</span>
-                                        </div>
-                                    </div>
-
                                     <!-- 4 Row -->
                                     <div class="row align-items-center py-2 border-bottom">
                                         <div class="col-md-4">
@@ -374,7 +364,7 @@
                                     </div>
 
                                     <!-- 5 Row -->
-                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                    <div class="row align-items-center py-2 border-bottom">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">DNS 정보</h6>
                                         </div>
@@ -384,17 +374,43 @@
                                     </div>
 
                                     <!-- 6 Row -->
-                                    <div class="row align-items-center py-2 border-bottom">
+                                    <!-- <div class="row align-items-center py-2 border-bottom">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">네트워크 인터페이스</h6>
                                         </div>
                                         <div class="col-md-8 text-left text-gray-800 font-weight-bold">
                                             <span id="net_info">Loading...</span>
                                         </div>
+                                    </div> -->
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 시스템 인포메이션 카드 부분 -->
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header -->
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h4 class="m-0 font-weight-bold text-primary">PsUtil Information</h4>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+
+                                    <!-- 3 Row -->
+                                    <div class="row align-items-center py-2 border-bottom border-top bg-light">
+                                        <div class="col-md-4">
+                                            <h6 class="font-weight-bold text-gray-800">CPU core</h6>
+                                        </div>
+                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
+                                            <span id="cpu_count">Loading...</span>
+                                        </div>
                                     </div>
 
+                                    
                                     <!-- 7 Row -->
-                                    <div class="row align-items-center py-2 border-bottom bg-light">
+                                    <div class="row align-items-center py-2 border-bottom">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">CPU 사용량</h6>
                                         </div>
@@ -404,7 +420,7 @@
                                     </div>
 
                                     <!-- 8 Row -->
-                                    <div class="row align-items-center py-2 border-bottom">
+                                    <div class="row align-items-center py-2 border-bottom bg-light">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">디스크 사용량</h6>
                                         </div>
@@ -414,52 +430,12 @@
                                     </div>
 
                                     <!-- 9 Row -->
-                                    <div class="row align-items-center py-2 bg-light">
+                                    <div class="row align-items-center py-2 border-bottom">
                                         <div class="col-md-4">
                                             <h6 class="font-weight-bold text-gray-800">메모리 사용량</h6>
                                         </div>
                                         <div class="col-md-8 text-left text-gray-800 font-weight-bold">
                                             <span id="memory-used">Loading...</span> GB / <span id="memory-total">Loading...</span> GB (<span id="memory-percent">Loading...</span>%)
-                                        </div>
-                                    </div>
-
-                                    <!-- 10 Row -->
-                                    <div class="row align-items-center py-2 border-bottom">
-                                        <div class="col-md-4">
-                                            <h6 class="font-weight-bold text-gray-800">공인 IP 1.</h6>
-                                        </div>
-                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="">123.123.123.1</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- 11 Row -->
-                                    <div class="row align-items-center py-2 bg-light">
-                                        <div class="col-md-4">
-                                            <h6 class="font-weight-bold text-gray-800">공인 IP 2.</h6>
-                                        </div>
-                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="">123.123.123.2</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- 12 Row -->
-                                    <div class="row align-items-center py-2 border-bottom">
-                                        <div class="col-md-4">
-                                            <h6 class="font-weight-bold text-gray-800">임시 1.</h6>
-                                        </div>
-                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="">길이 맞추기 용 1.</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- 13 Row -->
-                                    <div class="row align-items-center py-2 bg-light">
-                                        <div class="col-md-4">
-                                            <h6 class="font-weight-bold text-gray-800">임시 2.</h6>
-                                        </div>
-                                        <div class="col-md-8 text-left text-gray-800 font-weight-bold">
-                                            <span id="">길이 맞추기 용 2.</span>
                                         </div>
                                     </div>
 
@@ -469,8 +445,15 @@
 
                         
 
+
+
+                    
+
+                    </div>
+
+                    <div class="row">
                         <!-- CPU 사용량 그래프 -->
-                        <div class="col-xl-6 col-lg-3">
+                        <div class="col-xl-6 col-lg-5">
                             <div class="card shadow mb-4">
                                 <!-- Card Header -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -486,7 +469,9 @@
                                     </div>
                                 </div>
                             </div>
-
+                        </div>
+                            
+                        <div class="col-xl-6 col-lg-5">
                             <div class="card shadow mb-4">
                                 <!-- Card Header -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
@@ -503,9 +488,6 @@
                                 </div>
                             </div>
                         </div>
-
-                    
-
                     </div>
 
                     <!-- 네트워크 그래프 -Traffic Graphs- -->
@@ -517,7 +499,7 @@
                             <div class="card shadow mb-4">
                                 <!-- Card Header -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -Out (byte/sec)-</h4>
+                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -Out (Mbps)-</h4>
                                 </div>
                                 <!-- Card Body -->
                                 <div class="card-body">
@@ -538,7 +520,7 @@
                             <div class="card shadow mb-4">
                                 <!-- Card Header -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -In (byte/sec)-</h4>
+                                    <h4 class="m-0 font-weight-bold text-primary">Traffic Graphs -In (Mbps)-</h4>
                                 </div>
                                 <!-- Card Body -->
                                 <div class="card-body">
@@ -575,7 +557,6 @@
                                             <table class="table table-striped">
                                                 <thead>
                                                     <tr>
-                                                        <th>인터페이스</th>
                                                         <th>보낸 바이트</th>
                                                         <th>받은 바이트</th>
                                                         <th>보낸 패킷</th>
@@ -685,7 +666,7 @@
                         // 데이터를 각각의 HTML 요소에 표시
                         // document.getElementById('user_name').textContent = data.user_name;
                         document.getElementById('sys_info').textContent = JSON.stringify(data.sys_info, null, 2);
-                        document.getElementById('cpu_count').textContent = data.cpu_count + "개";
+                        document.getElementById('cpu_count').textContent = data.cpu_count + " core";
                         document.getElementById('ip_address').textContent = data.ip_address;
                         document.getElementById('dns_info').textContent = data.dns_info;
                         document.getElementById('net_info').textContent = data.net_info;
@@ -782,7 +763,6 @@
             // 새로운 데이터 행 생성
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
-                <td>enp0s3</td>
                 <td>${data.bytes_sent} byte</td>
                 <td>${data.bytes_recv} byte</td>
                 <td>${data.packets_sent} packet</td>
@@ -829,8 +809,8 @@
             scales: {
                 yAxes: [{
                             ticks: {
-                                min: 0,
-                                max: 100000,
+                                // min: 0,
+                                // max: 100000,
                                 fontSize : 15,
                             }
                         }],
@@ -871,8 +851,8 @@
             scales: {
                 yAxes: [{
                             ticks: {
-                                min: 0,
-                                max: 100000,
+                                // min: 0,
+                                // max: 100000,
                                 fontSize : 15,
                             }
                         }],
@@ -971,13 +951,13 @@
         data: {
             labels: [],  // 5분 간격의 시간을 담을 배열
             datasets: [{
-                label: 'Bytes Sent',
+                label: 'Mbits Sent',
                 borderColor: 'rgba(60, 179, 113, 1)',
                 backgroundColor: 'rgba(60, 179, 113, 0.2)',
                 fill: true,
                 data: [],  // y축 데이터 - 전송 바이트
             }, {
-                label: 'Bytes Received',
+                label: 'Mbits Received',
                 borderColor: 'rgba(153, 102, 255, 1)',
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
                 fill: true,
@@ -995,7 +975,7 @@
                 y: {
                     title: {
                         display: true,
-                        text: 'Bytes'
+                        text: 'Byte'
                     },
                     beginAtZero: true  // y축이 0부터 시작
                 }

@@ -92,6 +92,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">AI Controller:</h6>
                         <a class="collapse-item" href="/ai">자동 차단 규칙</a>
+                        <a class="collapse-item" href="/model">모델 설정</a>
                     </div>
                 </div>
             </li>
@@ -309,40 +310,6 @@
                     <!-- Page Heading -->
                     <h1 class="h3 mb-4 text-gray-800">플로팅 아이피</h1>
 
-                    <!-- 기존 인터페이스 설정 -->
-                    <!-- 버튼을 클릭하면 모달이 나타남 -->
-                    <!-- <button class="btn btn-success mb-3" data-toggle="modal" data-target="#blockIpModal5">인터페이스 설정</button> -->
-                    
-                    <!-- 인터페이스 설정 모달 -->
-                    <!-- <div class="modal fade" id="blockIpModal5" tabindex="-1" role="dialog" aria-labelledby="blockIpModal5Label" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="blockIpModal5Label">인터페이스 설정</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="postrouting-form">
-                                        <div class="form-group">
-                                            <label for="floting_ip">네트워크 IP 주소</label>
-                                            <input type="text" class="form-control" id="floting_ip" placeholder="예: 210.115.229.17" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="floting_inf">인터페이스</label>
-                                            <input type="text" class="form-control" id="floting_inf" placeholder="예: enp0s3" required>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" data-dismiss="modal">설정</button>
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
                     <!-- 버튼 -->
                     <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#blockIpModal">플로팅 아이피 연결</button>
                     <!-- <button class="btn btn-danger mb-3" data-toggle="modal" data-target="#blockIpModal3">플로팅 아이피 해제</button> -->
@@ -363,20 +330,16 @@
                                             <label for="inip">사설 IP 주소</label>
                                             <input type="text" class="form-control" id="inip" placeholder="예: 10.0.0.0/8" required>
                                         </div>
-                                        <!-- <div class="form-group">
-                                            <label for="exip">공인 IP 주소</label>
-                                            <input type="text" class="form-control" id="exip" placeholder="예: 192.0.0.1" required>
-                                        </div> -->
                                         <div class="form-group">
                                             <label for="exip">공인 IP 주소 (선택)</label>
                                             <select class="form-control" id="exip">
-                                                <option value="123.123.123.1">123.123.123.1</option>
-                                                <option value="123.123.123.2">123.123.123.2</option>
+                                                <option value="100.0.0.1">100.0.0.1</option>
+                                                <option value="100.0.0.2">100.0.0.2</option>
                                             </select>
                                         </div>
                                         <div class="form-group">
                                             <label for="inf">인터페이스</label>
-                                            <input type="text" class="form-control" id="inf" placeholder="예: enp0s8" required>
+                                            <input type="text" class="form-control" id="inf" placeholder="예: eth0" required>
                                         </div>
                                     </form>
                                 </div>
@@ -583,9 +546,9 @@
                             <td>${columns[7] || ""}</td> 
                             <td>${columns[8] || ""}</td> 
                             <td>${columns[9] || ""}</td> 
-                            <td>${columns[10] || ""}</td>
+                            <td>${columns[10] || ""}</td> 
                             <td>${
-                                index >= 3 && index < rules.length - 1 ? 
+                                index >= 2 && index < rules.length - 1 ? 
                                 `<button class="btn btn-danger" onclick="deleteRule(${index - 1})">삭제</button>` : 
                                 ""
                             }</td>

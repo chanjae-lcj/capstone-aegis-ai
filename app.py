@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session, send_from_directory
-# from sqlalchemy import create_engine
 import pam
 import re
 import os
@@ -20,6 +19,12 @@ import time
 import subprocess
 from collections import deque
 import signal # ai에 사용
+
+# iftop 관련해서 사용
+import csv
+from datetime import datetime
+import time
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션을 위한 비밀키 설정
@@ -66,7 +71,7 @@ def logout():
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("dashboard.html", username=username)
 
 
@@ -75,7 +80,7 @@ def dashboard():
 def rule():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("rule.html", username=username)
 
 
@@ -84,7 +89,7 @@ def rule():
 def allow():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("allow.html", username=username)
 
 
@@ -93,7 +98,7 @@ def allow():
 def ai():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("ai.html", username=username)
 
 
@@ -102,7 +107,7 @@ def ai():
 def model():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("model.html", username=username)
 
 
@@ -111,7 +116,7 @@ def model():
 def port():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("port.html", username=username)
 
 
@@ -120,7 +125,7 @@ def port():
 def nat():
     if 'username' not in session:
         return redirect(url_for('login'))
-    username = session['username']
+    username = session['username']    
     return render_template("nat.html", username=username)
 
 # VPN
@@ -295,77 +300,6 @@ def routes_page():
 
 # ------------------- gh.w -----------------------  static
 
-# ------------------- ai -------------------------  ai 패킷
-"""
-# 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
-ai_traffic_data = deque(maxlen=25)
-
-# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
-ai_previous_traffic = {
-    'bytes_sent': 0,
-    'bytes_recv': 0,
-    'packets_sent': 0,
-    'packets_recv': 0,
-    'errin': 0,
-    'errout': 0,
-    'dropin': 0,
-    'dropout': 0
-}
-
-# 쓰레드 안전성을 위한 락(lock)
-ai_lock = Lock()
-
-def ai_add_network_traffic(new_data):
-    global ai_previous_traffic
-
-    ai_current_traffic = {
-        'bytes_sent': new_data.bytes_sent - previous_traffic['bytes_sent'],
-        'bytes_recv': new_data.bytes_recv - previous_traffic['bytes_recv'],
-        'packets_sent': new_data.packets_sent - previous_traffic['packets_sent'],
-        'packets_recv': new_data.packets_recv - previous_traffic['packets_recv'],
-        'errin': new_data.errin - previous_traffic['errin'],
-        'errout': new_data.errout - previous_traffic['errout'],
-        'dropin': new_data.dropin - previous_traffic['dropin'],
-        'dropout': new_data.dropout - previous_traffic['dropout'],
-    }
-
-    # 현재 값을 저장해서 다음 10초 간격에 대비
-    ai_previous_traffic = {
-        'bytes_sent': new_data.bytes_sent,
-        'bytes_recv': new_data.bytes_recv,
-        'packets_sent': new_data.packets_sent,
-        'packets_recv': new_data.packets_recv,
-        'errin': new_data.errin,
-        'errout': new_data.errout,
-        'dropin': new_data.dropin,
-        'dropout': new_data.dropout
-    }
-
-    # 데이터를 큐에 저장 (5분마다)
-    with ai_lock:
-        ai_traffic_data.append(ai_current_traffic)
-
-    # 클라이언트로 실시간 데이터 전송
-    socketio.emit('ai_traffic_data', ai_current_traffic)
-
-def ai_network_traffic_generator():
-    # 이전 네트워크 트래픽 초기화
-    ai_data = psutil.net_io_counters()
-    ai_add_network_traffic(ai_data)
-
-    # 실시간 네트워크 트래픽 데이터를 수집
-    while True:
-        ai_data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
-        add_network_traffic(ai_data)  # 수집된 데이터를 처리
-        time.sleep(1)  # 10초마다 트래픽 데이터 추가
-
-# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
-def ai_start_network_traffic_thread():
-    thread = Thread(target=ai_network_traffic_generator)
-    thread.daemon = True
-    thread.start()
-# ----------------- ai ---------------------------- ai 패킷
-"""
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 시작
 
 # 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 1
@@ -436,21 +370,6 @@ def start_network_traffic_thread():
     thread.daemon = True
     thread.start()
 
-# Emit real-time network data every second
-# @socketio.on('request_network_data')
-# def handle_network_data():
-#     network_data = {}
-#     net_io = psutil.net_io_counters(pernic=True)  # Get network stats for each interface
-
-#     # Structure the data
-#     for interface, stats in net_io.items():
-#         network_data[interface] = {
-#             'bits_recv': int(stats.bytes_recv * 8 * 10**(-6)),  # 들어오는 비트, 단위(Mbit)
-#             'bits_sent': int(stats.bytes_sent * 8 * 10**(-6))  # 보내는 비트, 단위(Mbit)
-#         }
-    
-#     # Emit the network data to the client
-#     emit('network_data', network_data)
 
 # ----------------- 네트워크 정보 -------------------  네트워크 정보 끝
 
@@ -459,7 +378,7 @@ def start_network_traffic_thread():
 # 1개의 데이터를 저장하는 FIFO 큐, 최대 길이 11
 traffic_graph = deque(maxlen=1)
 
-# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+# 1초 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
 previous_graph = {
     'bytes_sent': psutil.net_io_counters().bytes_sent,
     'bytes_recv': psutil.net_io_counters().bytes_recv,
@@ -472,8 +391,8 @@ def add_network_graph(new_data):
     global previous_graph
 
     current_graph = {
-        'bytes_sent': new_data.bytes_sent - previous_graph['bytes_sent'],
-        'bytes_recv': new_data.bytes_recv - previous_graph['bytes_recv']
+        'bytes_sent': ((new_data.bytes_sent - previous_graph['bytes_sent']) * 8) / (1000 * 1000),
+        'bytes_recv': ((new_data.bytes_recv - previous_graph['bytes_recv']) * 8) / (1000 * 1000)
     }
 
     previous_graph = {
@@ -497,7 +416,7 @@ def network_traffic_generator2():
     while True:
         data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
         add_network_graph(data)  # 수집된 데이터를 처리
-        time.sleep(1)  # 300초마다 트래픽 데이터 추가
+        time.sleep(1)  # 1초마다 트래픽 데이터 추가
 
 # 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
 def start_network_traffic_thread2():
@@ -508,6 +427,7 @@ def start_network_traffic_thread2():
 
 
 # ---------------- 네트워크 그래프 2. -------------------- 두 번째 네트워크 그래프 시작.
+"""
 # 11개의 데이터를 저장하는 FIFO 큐, 최대 길이 11
 traffic_graph5 = deque(maxlen=11)
 
@@ -563,6 +483,69 @@ def start_network_traffic_thread5():
     thread = Thread(target=network_traffic_generator5)
     thread.daemon = True
     thread.start()
+"""
+# 11개의 데이터를 저장하는 FIFO 큐, 최대 길이 11
+traffic_graph5 = deque(maxlen=11)
+
+# 5분 동안의 네트워크 트래픽 양을 저장할 변수 (이전 측정값)
+previous_graph5 = {
+    'bytes_sent': psutil.net_io_counters().bytes_sent,
+    'bytes_recv': psutil.net_io_counters().bytes_recv,
+}
+
+# 쓰레드 안전성을 위한 락(lock)
+lock5 = Lock()
+
+def add_network_graph5(new_data):
+    global previous_graph5
+
+    # 5분 동안의 데이터 전송량 계산
+    current_bytes_sent = new_data.bytes_sent - previous_graph5['bytes_sent']
+    current_bytes_recv = new_data.bytes_recv - previous_graph5['bytes_recv']
+
+    # 이전 데이터를 업데이트
+    previous_graph5 = {
+        'bytes_sent': new_data.bytes_sent,
+        'bytes_recv': new_data.bytes_recv
+    }
+
+    # Mbps로 변환 (300초 동안의 데이터량을 초당 Mbps로 변환)
+    current_graph5 = {
+        'bytes_sent': (current_bytes_sent * 8) / (300 * 1000 * 1000),  # Mbps
+        'bytes_recv': (current_bytes_recv * 8) /  (300 * 1000 * 1000)   # Mbps
+    }
+
+    # 데이터를 큐에 저장 (5분마다)
+    with lock5:
+        traffic_graph5.append(current_graph5)
+
+    # 실시간 데이터 전송
+    socketio.emit('traffic_graph5', current_graph5)
+
+# 클라이언트 연결 시 기존의 11개 데이터를 전송하는 이벤트 처리
+@socketio.on('connect')
+def handle_connect5():
+    # 클라이언트가 연결될 때 지난 11개의 데이터를 전송
+    with lock5:
+        socketio.emit('initial_traffic_data', list(traffic_graph5))  # 자료구조 전체 데이터를 전송
+
+def network_traffic_generator5():
+    # 이전 네트워크 트래픽 초기화
+    data = psutil.net_io_counters()
+    add_network_graph5(data)
+
+    # 실시간 네트워크 트래픽 데이터를 수집
+    while True:
+        data = psutil.net_io_counters()  # 네트워크 I/O 데이터를 수집
+        add_network_graph5(data)  # 수집된 데이터를 처리
+        time.sleep(300)  # 300초마다 트래픽 데이터 추가
+
+# 네트워크 트래픽 데이터 수집을 별도 쓰레드에서 실행
+def start_network_traffic_thread5():
+    thread = Thread(target=network_traffic_generator5)
+    thread.daemon = True
+    thread.start()
+
 
 # ---------------- 네트워크 그래프 2. -------------------- 두 번째 네트워크 그래프 끝.
 
@@ -609,7 +592,7 @@ def os_info():
     try:
         user_name = os.getlogin() # 로그인 유저 이름
         sys_info = os.uname() # 시스템 정보
-        cpu_count = os.cpu_count() # cpu 개수
+        cpu_count = os.cpu_count() # cpu core
         ip_address = os.popen('hostname -I').read().strip() # ip 주소
         with open('/etc/resolv.conf', 'r') as f: # dns 정보
             dns_info = [line.strip() for line in f.readlines() if line.startswith('nameserver')]
@@ -663,7 +646,7 @@ def block_ip():
     if not is_valid_ip(ip):
         return jsonify({"error": "Invalid IP address"}), 400
 
-    command = f"sudo iptables -A INPUT -s {ip} -j DROP"
+    command = f"sudo iptables -A ip_Rule -s {ip} -j DROP"
     result = run_iptables_command(command)
 
     if result["error"]:
@@ -685,7 +668,7 @@ def block_port():
     if not is_valid_port(port):
         return jsonify({"error": "Invalid port number"}), 400
 
-    command = f"sudo iptables -A INPUT -p {protocol} --dport {port} -j DROP"
+    command = f"sudo iptables -A ip_Rule -p {protocol} --dport {port} -j DROP"
     result = run_iptables_command(command)
 
     if result["error"]:
@@ -710,7 +693,7 @@ def block_ip_port():
     if not is_valid_port(port):
         return jsonify({"error": "Invalid port number"}), 400
 
-    command = f"sudo iptables -A INPUT -s {ip} -p {protocol} --dport {port} -j DROP"
+    command = f"sudo iptables -A ip_Rule -s {ip} -p {protocol} --dport {port} -j DROP"
     result = run_iptables_command(command)
 
     if result["error"]:
@@ -755,9 +738,9 @@ def allow_ip():
 
     # iptables 명령어 생성 (포트와 프로토콜 포함 여부에 따라 달라집니다)
     if port:
-        command = f"sudo iptables -A INPUT -p {protocol} --dport {port} -s {ip_address} -j ACCEPT"
+        command = f"sudo iptables -A ip_Rule -p {protocol} --dport {port} -s {ip_address} -j ACCEPT"
     else:
-        command = f"sudo iptables -A INPUT -s {ip_address} -j ACCEPT"
+        command = f"sudo iptables -A ip_Rule -s {ip_address} -j ACCEPT"
 
     # iptables 명령어 실행
     try:
@@ -1026,14 +1009,14 @@ def update_ai_value():
 
     # Flask 애플리케이션의 루트 디렉토리 경로 가져오기
     app_root = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(app_root, 'aitest.py')
+    file_path = os.path.join(app_root, 'ai_ips.py')
 
     try:
         with open(file_path, 'r') as file:
             lines = file.readlines()
 
         # 10번째 라인을 새 값으로 변경
-        lines[9] = f"limit = {ai_value}\n"
+        lines[10] = f"limit = {ai_value}\n"
 
         with open(file_path, 'w') as file:
             file.writelines(lines)
@@ -1046,11 +1029,12 @@ def update_ai_value():
 def get_current_limit():
     try:
         # aitest.py 파일의 절대 경로 설정
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aitest.py')
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_ips.py')
         with open(script_path, 'r') as file:
             lines = file.readlines()
             # 10번째 줄 값 가져오기
-            limit_value = lines[9].strip()
+            # limit_value = lines[9].strip()
+            limit_value = lines[10].strip()
             return limit_value
     except Exception as e:
         return f"Error: {str(e)}"
@@ -1076,8 +1060,8 @@ def start_ai():
 
     try:
         # aitest.py 파일의 절대 경로 가져오기
-        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'aitest.py')
-        process = subprocess.Popen(['python3', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ai_ips.py')
+        process = subprocess.Popen(['sudo', 'python3', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         return jsonify({"success": "AI 모델이 성공적으로 실행되었습니다."})
     except Exception as e:
@@ -1157,6 +1141,7 @@ def get_inf_list_get():
 
 #--------------------------------------------------- 인터페이스 끝.
 
+
 # ------------------------------------------------------------------------------------------------------ 
 
 
@@ -1166,14 +1151,6 @@ if __name__ == '__main__':
     start_network_traffic_thread()
     start_network_traffic_thread2()
     start_network_traffic_thread5()
-    # ai_start_network_traffic_thread()
-
-    # config.py 파일에서 설정 불러오기
-    # app.config.from_pyfile("config.py")
-
-    # 데이터베이스 엔진 생성
-    # database = create_engine(app.config['DB_URL'], max_overflow=0)
-    # app.database = database
 
     # Flask 애플리케이션 실행
     app.run('0.0.0.0', port=6001, debug=True)
