@@ -1,3 +1,6 @@
+# 2024-2 한림대학교 캡스톤 디자인 프로젝트 
+</br>
+
 # 💻 프로젝트명
 ### AegisAI
 </br>
@@ -29,7 +32,9 @@
 <br>
 
 # 📆 개발 기간
-### 24.09 ~ 24.11
+<ul>
+  <li> <h3>24.09 ~ 24.11</h3> </li>
+</ul>
 </br>
 
 
@@ -67,7 +72,7 @@
   <tr>
     <td>Static Routing</td>
     <td>
-      
+      <img width= "689" alt="Static Routing" src=https://github.com/user-attachments/assets/bfa06ff4-e00e-4514-aae1-ba0e82b9a900>
     </td>
   </tr>
 </table>
@@ -75,32 +80,50 @@
 <table>
    <tr>
     <td>BGP</td>
-    <td></td>
+    <td>
+      <img width= "689" alt="BGP" src=https://github.com/user-attachments/assets/4e205d4e-a6ff-4c45-9e48-674e293ac14e>
+    </td>
   </tr>
   <tr>
     <td>VPN</td>
-    <td></td>
+    <td>
+      <img width= "689" alt="VPN" src=https://github.com/user-attachments/assets/5b28682e-8f22-4ba9-ba01-4ec62562c29c>
+    </td>
   </tr>
   <tr>
-    <td>Interface Management</td>
-    <td></td>
+    <td>Interface </br> Management</td>
+    <td>
+      <img width= "689" alt="VPN" src=https://github.com/user-attachments/assets/3c63f54a-46f6-4ef3-adb1-1c921888eaff>
+    </td>
   </tr>
   <tr>
-    <td>User Interface</td>
-    <td></td>
+    <td>User </br> Interface</td>
+      <td><img width= "689" alt="User Interface" src=https://github.com/user-attachments/assets/f2f7abaf-bf9c-456c-8863-a282762ba327></td>
   </tr>
 </table>
 
 
 # 🛠️ 구성도
 <ul>
-  <li> 네트워크 구성도</li>
-
-  <li> 아키텍처 구성도</li>
+  <li> 네트워크 구조</li>
+    <img  alt="Network structure" src=https://github.com/user-attachments/assets/1f89e5ce-0d7a-4d0b-9968-88fc79751914>
+  <li> 디렉터리 구성도</li>
+    <img  alt="User Interface" src=https://github.com/user-attachments/assets/ffb80677-7683-4019-bb55-47f140bc393b>
 </ul>
-
+</br>
 
 # 📚 기술 스택
+<div align=left> 
+  <img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white"> 
+  <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
+  <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">
+  </br>
 
-
-![MergedImages](https://github.com/user-attachments/assets/7b75f1f9-7331-4f97-9ace-fbcbcbb02dbf)
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"> 
+  <img src="https://img.shields.io/badge/openvpn-EA7E20?style=for-the-badge&logo=openvpn&logoColor=white"> 
+  <img src="https://img.shields.io/badge/linux-FCC624?style=for-the-badge&logo=linux&logoColor=white"> 
+  </br>
+  
+  <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> 
+  </br>
+</div>
