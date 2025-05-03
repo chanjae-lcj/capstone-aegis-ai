@@ -1,31 +1,48 @@
-# 2024-2 한림대학교 캡스톤 디자인 프로젝트 
+<h1> 2024-2 한림대학교 캡스톤 디자인 프로젝트 </h1>
 </br>
 
 # 💻 프로젝트명
-### AegisAI
+### 인공지능을 활용한 통합 보안 솔루션 (UTM) 사이트
+
 </br>
 
 # 📝 프로젝트 소개
+### 계기
 
-
+<p>
+한국인터넷진흥원에서 발표한 사이버 위협 동향을 통해 근 4년간 DDoS 공격 신고 건수가 2배 이상 늘었다는 사실을 접하게 되었다. </br>
+이러한 사실을 알고 DDoS로 인한 피해를 줄일 수 있는 방법에 대해 고민해보게 되었다. </br>
+그러던 중 최근 부상하고 있는 AI기술을 방화벽에 접목한다면 좋은 결과물이 나올 수 있다고 생각해보게 되었고, 딥러닝 모델을 이용한다면 정상적인 트래픽 흐름의 특징을 추출한 뒤에 이를 통해 트래픽의 흐름을 예측 가능할 것이고 이와 비교하여 악의적인 트래픽, 즉 DDoS와 같은 공격을 감지할 수 있을 것이라 생각하였다. </br>
+이후 iptables와 같은 방화벽 도구들을 이용한다면 자동으로 공격을 탐지 및 차단할 수 있지 않을까 라는 생각에 해당 프로젝트를 시작하게 되었다. </br>
+</p>
 </br>
+
+### 목표
+
+<p>
+  먼저 이 프로젝트의 1차적인 목표는 외부에서 들어오는 공격, 특히 DDoS에 대하여 인공지능을 활용하여 방어할 수 있도록 구성하는 것이었다. </br>
+  우선 딥러닝 학습을 통해 정상적인 네트워크 흐름에 대해 다음 값을 예측하도록 하고, 예측한 값에서 크게 벗어났을 때 이를 공격이라 간주하게 한다. </br>
+  그리고 이러한 패킷이 전송된 IP를 방화벽 도구를 이용하여 자동으로 차단하고 추가적인 공격을 방어할 수 있게 하는 것이 목표였다. </br>
+  여기서 더 나아가 위에서 서술하였던 자동 IP 차단 이외에도 수동 IP 차단/허용, Routing, NAT 그리고 VPN 기능을 구현하고, 시각화를 통한 모니터링과 각 기능의 세부 설정 조정이 가능한 웹페이지를 구성한다. </br>
+  최종적으로 다양한 보안 기능을 하나의 장치나 솔루션으로 통합하여 네트워크의 보안 위협을 관리하는 시스템인 UTM을 구현하는 것을 최종 목표로 하였다.
+</p>
 
 # 👤 팀원
 <table>
   <tr>
     <td>팀장</td>
     <td>김태일</td>
-    <td></td>
+    <td>AI</td>
   </tr>
   <tr>
     <td>팀원</td>
     <td>이찬재</td>
-    <td></td>
+    <td>Full Stack</td>
   </tr>
   <tr>
     <td>팀원</td>
     <td>허정윤</td>
-    <td></td>
+    <td>Security</td>
   </tr>
 </table>
 
@@ -125,5 +142,13 @@
   </br>
   
   <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> 
+  <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=Flask&logoColor=white"> 
+  <img src="https://img.shields.io/badge/bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
+  <img src="https://img.shields.io/badge/nvidia-76B900?style=for-the-badge&logo=nvidia&logoColor=white">
   </br>
+
+  <img src="https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white">
+  <img src="https://img.shields.io/badge/pytorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white">
+
 </div>
+
