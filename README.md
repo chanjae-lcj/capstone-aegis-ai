@@ -121,12 +121,16 @@
 
 
 # 🛠️ 구성도
-<ul>
-  <li> 네트워크 구조</li>
+<div>  
+  <ul>
+    <li> 네트워크 구조</li>
     <img  alt="Network structure" src=https://github.com/user-attachments/assets/1f89e5ce-0d7a-4d0b-9968-88fc79751914>
-  <li> 디렉터리 구성도</li>
+    <img  width= "389" alt="Network structure" src=https://github.com/user-attachments/assets/dfd2302e-83d1-4bc7-916b-0f12dd6a5917>
+    <li> 디렉터리 구성도</li>
     <img  alt="User Interface" src=https://github.com/user-attachments/assets/ffb80677-7683-4019-bb55-47f140bc393b>
-</ul>
+  </ul>
+</div>
+
 </br>
 
 # 📚 기술 스택
